@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Added `UPDATE_OVERWRITE` environment variable to support cases where
+  full control of the products configmap data is required.
+
 ### Changed
 
 - dependabot: Bump `requests` from 2.30.0 to 2.31.0
