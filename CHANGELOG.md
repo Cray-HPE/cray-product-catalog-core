@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - dependabot: Bump `requests` from 2.30.0 to 2.31.0
 - dependabot: Bump `google-auth` from 2.17.3 to 2.20.0
+- dependabot: Bump `cachetools` from 5.3.0 to 5.3.1
 
 ## [1.8.8] - 2023-05-31
 
