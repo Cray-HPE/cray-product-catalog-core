@@ -129,6 +129,7 @@ def active_field_exists(product_data):
     """ Return True if any version of the given product is using the 'active' field."""
     return any("active" in product_data[version] for version in product_data)
 
+
 def update_config_map(data: dict, name, namespace):
     """
     Get the config map `data` to be added.
@@ -193,7 +194,8 @@ def update_config_map(data: dict, name, namespace):
                 if UPDATE_OVERWRITE:
                     product_data[PRODUCT_VERSION] = data
                 else:
-                    merged_product_data = merge_dict(data, product_data[PRODUCT_VERSION]) == product_data[PRODUCT_VERSION]
+                    merged_product_data = merge_dict(
+                        data, product_data[PRODUCT_VERSION]) == product_data[PRODUCT_VERSION]
 
                 if merged_product_data or UPDATE_OVERWRITE:
                     if SET_ACTIVE_VERSION and REMOVE_ACTIVE_FIELD:
