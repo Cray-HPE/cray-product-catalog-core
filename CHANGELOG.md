@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.9] - 2023-07-05
+
+### Added
+
+- Added `UPDATE_OVERWRITE` environment variable to support cases where
+  full control of the products configmap data is required.
+
+### Changed
+
+- dependabot: Bump `requests` from 2.30.0 to 2.31.0
+- dependabot: Bump `google-auth` from 2.17.3 to 2.21.0
+- dependabot: Bump `cachetools` from 5.3.0 to 5.3.1
+- dependabot: Bump `websocket-client` from 1.5.2 to 1.6.1
+- Added `UPDATE_OVERWRITE` environment variable to support cases where
+  full control of the products configmap data is required.
+
 ## [1.8.8] - 2023-05-31
 
 ### Changed
@@ -369,7 +385,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.8...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.9...HEAD
+
+[1.8.9]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.8...v1.8.9
 
 [1.8.8]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.7...v1.8.8
 
