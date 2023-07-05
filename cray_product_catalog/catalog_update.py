@@ -35,21 +35,21 @@ import logging
 import os
 import random
 import time
-import urllib3
-from urllib3.util.retry import Retry
 
+import urllib3
+import yaml
 from jsonschema.exceptions import ValidationError
-from kubernetes import client
 from kubernetes.client.api_client import ApiClient
 from kubernetes.client.models.v1_config_map import V1ConfigMap
 from kubernetes.client.models.v1_object_meta import V1ObjectMeta
 from kubernetes.client.rest import ApiException
-import yaml
+from urllib3.util.retry import Retry
 
 from cray_product_catalog.logging import configure_logging
 from cray_product_catalog.schema.validate import validate
 from cray_product_catalog.util.k8s import load_k8s
 from cray_product_catalog.util.merge_dict import merge_dict
+from kubernetes import client
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -65,6 +65,7 @@ YAML_CONTENT_STRING = os.environ.get("YAML_CONTENT_STRING", "").strip()   # see 
 SET_ACTIVE_VERSION = bool(os.environ.get("SET_ACTIVE_VERSION"))
 REMOVE_ACTIVE_FIELD = bool(os.environ.get("REMOVE_ACTIVE_FIELD"))
 VALIDATE_SCHEMA = bool(os.environ.get("VALIDATE_SCHEMA"))
+UPDATE_OVERWRITE = bool(os.environ.get("UPDATE_OVERWRITE"))
 
 ERR_NOT_FOUND = 404
 ERR_CONFLICT = 409
@@ -129,7 +130,7 @@ def active_field_exists(product_data):
     return any("active" in product_data[version] for version in product_data)
 
 
-def update_config_map(data, name, namespace):
+def update_config_map(data: dict, name, namespace):
     """
     Get the config map `data` to be added.
 
@@ -189,7 +190,14 @@ def update_config_map(data, name, namespace):
             # Key with same version exists in ConfigMap
             else:
                 # Data to insert matches data found in configmap.
-                if merge_dict(data, product_data[PRODUCT_VERSION]) == product_data[PRODUCT_VERSION]:
+                merged_product_data = None
+                if UPDATE_OVERWRITE:
+                    product_data[PRODUCT_VERSION] = data
+                else:
+                    merged_product_data = merge_dict(
+                        data, product_data[PRODUCT_VERSION]) == product_data[PRODUCT_VERSION]
+
+                if merged_product_data or UPDATE_OVERWRITE:
                     if SET_ACTIVE_VERSION and REMOVE_ACTIVE_FIELD:
                         # This should not happen (see main method).
                         raise SystemExit(1)
