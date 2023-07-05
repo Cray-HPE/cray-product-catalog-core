@@ -140,7 +140,7 @@ All configuration options are provided as environment variables.
  * `UPDATE_OVERWRITE` = `''`
 
 > When set, the catalog_update function will perform an update that will
-> overwrite the keys in the config map. Contrasted to the default implementation
+> overwrite the entire product data in the configmap. Contrasted to the default implementation
 > which will perform a merge operation between the two maps.
 > This is useful for removing nested data or just simply removing entire
 > entries from the config map.
