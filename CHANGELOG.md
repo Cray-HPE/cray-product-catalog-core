@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
 - Added `UPDATE_OVERWRITE` environment variable to support cases where
   full control of the products configmap data is required.
 
 ### Changed
 
 - dependabot: Bump `requests` from 2.30.0 to 2.31.0
-- dependabot: Bump `google-auth` from 2.17.3 to 2.20.0
+- dependabot: Bump `google-auth` from 2.17.3 to 2.21.0
 - dependabot: Bump `cachetools` from 5.3.0 to 5.3.1
 - dependabot: Bump `websocket-client` from 1.5.2 to 1.6.1
 
