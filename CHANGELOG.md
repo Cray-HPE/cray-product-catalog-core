@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- dependabot: Bump `urllib3` from 1.26.15 to 1.26.16
+
 ## [1.8.9] - 2023-07-05
 
 ### Added
