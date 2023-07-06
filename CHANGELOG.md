@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - dependabot: Bump `urllib3` from 1.26.15 to 1.26.16
 
+### Dependencies
+- Bump `jsonschema` from 4.17.3 to 4.18.0 (#250)
+
 ## [1.8.9] - 2023-07-05
 
 ### Added
