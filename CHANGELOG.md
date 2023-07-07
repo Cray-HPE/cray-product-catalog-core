@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- dependabot: Bump `urllib3` from 1.26.15 to 1.26.16
+- Update `pip` before installing packages in Dockerfile, to avoid image creation
+  failure caused by `pip` building `maturin` from source. (#250)
+
+### Dependencies
+
+- Bump `urllib3` from 1.26.15 to 1.26.16
+- Bump `jsonschema` from 4.17.3 to 4.18.0 (#250)
 
 ## [1.8.9] - 2023-07-05
 
