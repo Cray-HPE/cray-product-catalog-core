@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.10] - 2023-07-07
+
+### Changed
+
+- Update `pip` before installing packages in Dockerfile, to avoid image creation
+  failure caused by `pip` building `maturin` from source. (#250)
+
+### Dependencies
+
+- Bump `urllib3` from 1.26.15 to 1.26.16
+- Bump `jsonschema` from 4.17.3 to 4.18.0 (#250)
+
 ## [1.8.9] - 2023-07-05
 
 ### Added
@@ -385,7 +397,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.9...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.10...HEAD
+
+[1.8.10]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.9...v1.8.10
 
 [1.8.9]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.8...v1.8.9
 
