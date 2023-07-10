@@ -22,15 +22,19 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-# This script takes a PRODUCT and PRODUCT_VERSION and applies the content of
-# a YAML file to a Kubernetes ConfigMap as follows:
-#
-# {PRODUCT}:
-#   {PRODUCT_VERSION}:
-#     {content of yaml file}
-#
-# Since updates to a ConfigMap are not atomic, this script will continue to
-# attempt to update the ConfigMap until it has been patched successfully.
+
+"""
+This script takes a PRODUCT and PRODUCT_VERSION and applies the content of
+a YAML file to a Kubernetes ConfigMap as follows:
+
+{PRODUCT}:
+  {PRODUCT_VERSION}:
+    {content of yaml file}
+
+Since updates to a ConfigMap are not atomic, this script will continue to
+attempt to update the ConfigMap until it has been patched successfully.
+"""
+
 import logging
 import os
 import random
@@ -43,13 +47,13 @@ from kubernetes.client.api_client import ApiClient
 from kubernetes.client.models.v1_config_map import V1ConfigMap
 from kubernetes.client.models.v1_object_meta import V1ObjectMeta
 from kubernetes.client.rest import ApiException
+from kubernetes import client
 from urllib3.util.retry import Retry
 
 from cray_product_catalog.logging import configure_logging
 from cray_product_catalog.schema.validate import validate
 from cray_product_catalog.util.k8s import load_k8s
 from cray_product_catalog.util.merge_dict import merge_dict
-from kubernetes import client
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -82,7 +86,7 @@ def validate_schema(data):
         validate(data)
     except ValidationError as err:
         LOGGER.error("Data failed schema validation: %s", err)
-        raise SystemExit(1)
+        raise SystemExit(1) from err
 
 
 def read_yaml_content(yaml_file):
@@ -113,13 +117,13 @@ def current_version_is_active(product_data):
     other_versions = [version for version in product_data if version != PRODUCT_VERSION]
 
     return current_version.get('active') and not any(
-               [product_data[version].get('active') for version in other_versions]
+               product_data[version].get('active') for version in other_versions
            )
 
 
 def remove_active_field(product_data):
     """ Remove the 'active' field for a given product. """
-    LOGGER.info(f"Deleting 'active' field for all versions of %s", PRODUCT)
+    LOGGER.info("Deleting 'active' field for all versions of %s", PRODUCT)
     for version in product_data:
         if "active" in product_data[version]:
             del product_data[version]["active"]
@@ -164,15 +168,14 @@ def update_config_map(data: dict, name, namespace):
         # Read in the ConfigMap
         try:
             response = api_instance.read_namespaced_config_map(name, namespace)
-        except ApiException as e:
+        except ApiException as err:
             LOGGER.exception("Error calling read_namespaced_config_map")
 
             # ConfigMap doesn't exist yet
-            if e.status == ERR_NOT_FOUND:
+            if err.status == ERR_NOT_FOUND:
                 LOGGER.warning("ConfigMap %s/%s doesn't exist, attempting again", namespace, name)
                 continue
-            else:
-                raise  # unrecoverable
+            raise  # unrecoverable
 
         # Determine if ConfigMap needs to be updated
         config_map_data = response.data or {}  # if no ConfigMap data exists
@@ -201,7 +204,7 @@ def update_config_map(data: dict, name, namespace):
                     if SET_ACTIVE_VERSION and REMOVE_ACTIVE_FIELD:
                         # This should not happen (see main method).
                         raise SystemExit(1)
-                    elif SET_ACTIVE_VERSION:
+                    if SET_ACTIVE_VERSION:
                         if current_version_is_active(product_data):
                             LOGGER.debug("ConfigMap data updates exist and desired version is active; Exiting")
                             break
@@ -231,8 +234,8 @@ def update_config_map(data: dict, name, namespace):
             api_instance.patch_namespaced_config_map(
                 name, namespace, body=new_config_map
             )
-        except ApiException as e:
-            if e.status == ERR_CONFLICT:
+        except ApiException as err:
+            if err.status == ERR_CONFLICT:
                 # A conflict is raised if the resourceVersion field was unexpectedly
                 # incremented, e.g. if another process updated the ConfigMap. This
                 # provides concurrency protection.
@@ -242,6 +245,7 @@ def update_config_map(data: dict, name, namespace):
 
 
 def main():
+    """ Main function """
     configure_logging()
     LOGGER.info(
         "Updating ConfigMap=%s in namespace=%s for product/version=%s/%s",
@@ -254,7 +258,7 @@ def main():
         )
         raise SystemExit(1)
 
-    elif SET_ACTIVE_VERSION:
+    if SET_ACTIVE_VERSION:
         LOGGER.info(
             "Setting %s:%s to active because SET_ACTIVE_VERSION was set",
             PRODUCT, PRODUCT_VERSION

@@ -21,23 +21,26 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-#
-# This script takes a PRODUCT and PRODUCT_VERSION and deletes the content
-# in a Kubernetes ConfigMap in one of two ways:
-#
-# If a 'key' is specified within a PRODUCT/PRODUCT_VERSION:
-#
-# {PRODUCT}:
-#   {PRODUCT_VERSION}:
-#     {key}        # <- content to delete
-#
-# If a 'key' is not specified:
-#
-# {PRODUCT}:
-#   {PRODUCT_VERSION}: # <- delete entire version
-#
-# Since updates to a ConfigMap are not atomic, this script will continue to
-# attempt to modify the ConfigMap until it has been patched successfully.
+
+"""
+This script takes a PRODUCT and PRODUCT_VERSION and deletes the content
+in a Kubernetes ConfigMap in one of two ways:
+
+If a 'key' is specified within a PRODUCT/PRODUCT_VERSION:
+
+{PRODUCT}:
+  {PRODUCT_VERSION}:
+    {key}        # <- content to delete
+
+If a 'key' is not specified:
+
+{PRODUCT}:
+  {PRODUCT_VERSION}: # <- delete entire version
+
+Since updates to a ConfigMap are not atomic, this script will continue to
+attempt to modify the ConfigMap until it has been patched successfully.
+"""
+
 import logging
 import os
 import random
@@ -94,15 +97,14 @@ def modify_config_map(name, namespace, product, product_version, key=None):
         # Read in the ConfigMap
         try:
             response = api_instance.read_namespaced_config_map(name, namespace)
-        except ApiException as e:
+        except ApiException as err:
             LOGGER.exception("Error calling read_namespaced_config_map")
 
             # ConfigMap doesn't exist yet
-            if e.status == 404 and attempt < max_attempts:
+            if err.status == 404 and attempt < max_attempts:
                 LOGGER.warning("ConfigMap %s/%s doesn't exist, attempting again.", namespace, name)
                 continue
-            else:
-                raise  # unrecoverable
+            raise  # unrecoverable
 
         # Determine if ConfigMap needs to be updated
         config_map_data = response.data or {}  # if no ConfigMap data exists
@@ -158,6 +160,7 @@ def modify_config_map(name, namespace, product, product_version, key=None):
 
 
 def main():
+    """ Main function """
     configure_logging()
     # Parameters to identify ConfigMap and product/version to remove
     PRODUCT = os.environ.get("PRODUCT").strip()  # required

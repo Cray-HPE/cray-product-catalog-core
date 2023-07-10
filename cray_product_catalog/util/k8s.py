@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2021-2022 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,13 +20,16 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-# Defines a utility function for loading the k8s config.
+
+"""
+Defines a utility function for loading the Kubernetes configuration.
+"""
 
 from kubernetes import config
 
 
 def load_k8s():
-    """ Load Kubernetes Configuration """
+    """ Load Kubernetes configuration """
     try:
         config.load_incluster_config()
     except Exception:

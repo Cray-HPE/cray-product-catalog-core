@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - CASMCMS-8709: Linting of log messages and code comments to remove inconsistencies.
+- CASMCMS-8709: Created `.pylintrc` configuration file for use when running pylint during builds.
+- CASMCMS-8709: Made improvements based on pylint warnings and suggestions (no functional changes).
 
 ### Dependencies
 - Bump `charset-normalizer` from 3.1.0 to 3.2.0 (#254)

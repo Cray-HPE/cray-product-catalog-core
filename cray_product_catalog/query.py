@@ -19,8 +19,11 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-#
-# Defines classes for querying for information about the installed products.
+
+"""
+Defines classes for querying for information about the installed products.
+"""
+
 import logging
 from pkg_resources import parse_version
 
@@ -46,7 +49,6 @@ LOGGER = logging.getLogger(__name__)
 
 class ProductCatalogError(Exception):
     """An error occurred reading or manipulating product installs."""
-    pass
 
 
 class ProductCatalog:
@@ -73,7 +75,7 @@ class ProductCatalog:
             load_k8s()
             return CoreV1Api()
         except ConfigException as err:
-            raise ProductCatalogError(f'Unable to load kubernetes configuration: {err}.')
+            raise ProductCatalogError(f'Unable to load kubernetes configuration: {err}.') from err
 
     def __init__(self, name=PRODUCT_CATALOG_CONFIG_MAP_NAME, namespace=PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE):
         """Create the ProductCatalog object.
@@ -93,12 +95,12 @@ class ProductCatalog:
         except MaxRetryError as err:
             raise ProductCatalogError(
                 f'Unable to connect to Kubernetes to read {namespace}/{name} ConfigMap: {err}'
-            )
+            ) from err
         except ApiException as err:
             # The full string representation of ApiException is very long, so just log err.reason.
             raise ProductCatalogError(
                 f'Error reading {namespace}/{name} ConfigMap: {err.reason}'
-            )
+            ) from err
 
         if config_map.data is None:
             raise ProductCatalogError(
@@ -114,15 +116,15 @@ class ProductCatalog:
         except YAMLError as err:
             raise ProductCatalogError(
                 f'Failed to load ConfigMap data: {err}'
-            )
+            ) from err
 
         invalid_products = [
             str(p) for p in self.products if not p.is_valid
         ]
         if invalid_products:
             LOGGER.debug(
-                f'The following products have product catalog data that '
-                f'is not valid against the expected schema: {", ".join(invalid_products)}'
+                'The following products have product catalog data that is not valid against the expected schema: %s',
+                ", ".join(invalid_products)
             )
 
         self.products = [
@@ -150,7 +152,7 @@ class ProductCatalog:
                 raise ProductCatalogError(f'No installed products with name {name}.')
             latest = sorted(matching_name_products,
                             key=lambda p: parse_version(p.version))[-1]
-            LOGGER.debug(f'Using latest version ({latest.version}) of product {name}')
+            LOGGER.debug('Using latest version (%s) of product %s', latest.version, name)
             return latest
 
         matching_products = [
@@ -161,7 +163,7 @@ class ProductCatalog:
             raise ProductCatalogError(
                 f'No installed products with name {name} and version {version}.'
             )
-        elif len(matching_products) > 1:
+        if len(matching_products) > 1:
             raise ProductCatalogError(
                 f'Multiple installed products with name {name} and version {version}.'
             )
@@ -291,6 +293,7 @@ class InstalledProductVersion:
 
     @property
     def recipes(self):
+        """list of dict: the list of recipes provided by this product"""
         return self._get_ims_resources('recipes')
 
     @property
