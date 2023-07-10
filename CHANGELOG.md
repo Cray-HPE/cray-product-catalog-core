@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.11] - 2023-07-10
+
 ### Changed
 - CASMCMS-8709: Linting of log messages and code comments to remove inconsistencies.
 - CASMCMS-8709: Created `.pylintrc` configuration file for use when running pylint during builds.
@@ -405,7 +407,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.10...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.11...HEAD
+
+[1.8.11]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.10...v1.8.11
 
 [1.8.10]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.9...v1.8.10
 
