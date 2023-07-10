@@ -22,15 +22,19 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-# This script takes a PRODUCT and PRODUCT_VERSION and applies the content of
-# a YAML file to a Kubernetes ConfigMap as follows:
-#
-# {PRODUCT}:
-#   {PRODUCT_VERSION}:
-#     {content of yaml file}
-#
-# Since updates to a configmap are not atomic, this script will continue to
-# attempt to update the config map until it has been patched successfully.
+
+"""
+This script takes a PRODUCT and PRODUCT_VERSION and applies the content of
+a YAML file to a Kubernetes ConfigMap as follows:
+
+{PRODUCT}:
+  {PRODUCT_VERSION}:
+    {content of yaml file}
+
+Since updates to a ConfigMap are not atomic, this script will continue to
+attempt to update the ConfigMap until it has been patched successfully.
+"""
+
 import logging
 import os
 import random
@@ -43,17 +47,17 @@ from kubernetes.client.api_client import ApiClient
 from kubernetes.client.models.v1_config_map import V1ConfigMap
 from kubernetes.client.models.v1_object_meta import V1ObjectMeta
 from kubernetes.client.rest import ApiException
+from kubernetes import client
 from urllib3.util.retry import Retry
 
 from cray_product_catalog.logging import configure_logging
 from cray_product_catalog.schema.validate import validate
 from cray_product_catalog.util.k8s import load_k8s
 from cray_product_catalog.util.merge_dict import merge_dict
-from kubernetes import client
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Parameters to identify config map and content in it to update
+# Parameters to identify ConfigMap and content in it to update
 PRODUCT = os.environ.get("PRODUCT").strip()  # required
 PRODUCT_VERSION = os.environ.get("PRODUCT_VERSION").strip()  # required
 CONFIG_MAP = os.environ.get("CONFIG_MAP", "cray-product-catalog").strip()
@@ -82,7 +86,7 @@ def validate_schema(data):
         validate(data)
     except ValidationError as err:
         LOGGER.error("Data failed schema validation: %s", err)
-        raise SystemExit(1)
+        raise SystemExit(1) from err
 
 
 def read_yaml_content(yaml_file):
@@ -113,13 +117,13 @@ def current_version_is_active(product_data):
     other_versions = [version for version in product_data if version != PRODUCT_VERSION]
 
     return current_version.get('active') and not any(
-               [product_data[version].get('active') for version in other_versions]
+               product_data[version].get('active') for version in other_versions
            )
 
 
 def remove_active_field(product_data):
     """ Remove the 'active' field for a given product. """
-    LOGGER.info(f"Deleting 'active' field for all versions of %s", PRODUCT)
+    LOGGER.info("Deleting 'active' field for all versions of %s", PRODUCT)
     for version in product_data:
         if "active" in product_data[version]:
             del product_data[version]["active"]
@@ -132,13 +136,13 @@ def active_field_exists(product_data):
 
 def update_config_map(data: dict, name, namespace):
     """
-    Get the config map `data` to be added.
+    Get the ConfigMap `data` to be added.
 
-    1. Wait for the config map to be present in the namespace
-    2. Read the config map
-    3. Patch the config_map
-    4. Read back the config_map
-    5. Repeat steps 2-4 if config_map does not include the changes requested,
+    1. Wait for the ConfigMap to be present in the namespace
+    2. Read the ConfigMap
+    3. Patch the ConfigMap
+    4. Read back the ConfigMap
+    5. Repeat steps 2-4 if ConfigMap does not include the changes requested,
        or if step 3 failed due to a conflict.
     """
     k8sclient = ApiClient()
@@ -153,29 +157,28 @@ def update_config_map(data: dict, name, namespace):
 
     while True:
 
-        # Wait a while to check the config map in case multiple products are
-        # attempting to update the same config map, or the config map doesn't
+        # Wait a while to check the ConfigMap in case multiple products are
+        # attempting to update the same ConfigMap, or the ConfigMap doesn't
         # exist yet
         attempt += 1
         sleepy_time = random.randint(1, 3)
         LOGGER.debug("Resting %ss before reading ConfigMap", sleepy_time)
         time.sleep(sleepy_time)
 
-        # Read in the config map
+        # Read in the ConfigMap
         try:
             response = api_instance.read_namespaced_config_map(name, namespace)
-        except ApiException as e:
+        except ApiException as err:
             LOGGER.exception("Error calling read_namespaced_config_map")
 
-            # Config map doesn't exist yet
-            if e.status == ERR_NOT_FOUND:
+            # ConfigMap doesn't exist yet
+            if err.status == ERR_NOT_FOUND:
                 LOGGER.warning("ConfigMap %s/%s doesn't exist, attempting again", namespace, name)
                 continue
-            else:
-                raise  # unrecoverable
+            raise  # unrecoverable
 
         # Determine if ConfigMap needs to be updated
-        config_map_data = response.data or {}  # if no config map data exists
+        config_map_data = response.data or {}  # if no ConfigMap data exists
         if PRODUCT not in config_map_data:
             LOGGER.info("Product=%s does not exist; will update", PRODUCT)
             config_map_data[PRODUCT] = product_data = {PRODUCT_VERSION: {}}
@@ -189,7 +192,7 @@ def update_config_map(data: dict, name, namespace):
                 product_data[PRODUCT_VERSION] = {}
             # Key with same version exists in ConfigMap
             else:
-                # Data to insert matches data found in configmap.
+                # Data to insert matches data found in ConfigMap.
                 merged_product_data = None
                 if UPDATE_OVERWRITE:
                     product_data[PRODUCT_VERSION] = data
@@ -201,7 +204,7 @@ def update_config_map(data: dict, name, namespace):
                     if SET_ACTIVE_VERSION and REMOVE_ACTIVE_FIELD:
                         # This should not happen (see main method).
                         raise SystemExit(1)
-                    elif SET_ACTIVE_VERSION:
+                    if SET_ACTIVE_VERSION:
                         if current_version_is_active(product_data):
                             LOGGER.debug("ConfigMap data updates exist and desired version is active; Exiting")
                             break
@@ -213,7 +216,7 @@ def update_config_map(data: dict, name, namespace):
                         LOGGER.debug("ConfigMap data updates exist; Exiting")
                         break
 
-        # Patch the config map if needed
+        # Patch the ConfigMap if needed
         product_data[PRODUCT_VERSION] = merge_dict(data, product_data[PRODUCT_VERSION])
         if SET_ACTIVE_VERSION:
             set_active_version(product_data)
@@ -231,20 +234,21 @@ def update_config_map(data: dict, name, namespace):
             api_instance.patch_namespaced_config_map(
                 name, namespace, body=new_config_map
             )
-        except ApiException as e:
-            if e.status == ERR_CONFLICT:
+        except ApiException as err:
+            if err.status == ERR_CONFLICT:
                 # A conflict is raised if the resourceVersion field was unexpectedly
-                # incremented, e.g. if another process updated the config map. This
+                # incremented, e.g. if another process updated the ConfigMap. This
                 # provides concurrency protection.
-                LOGGER.warning("Conflict updating config map")
+                LOGGER.warning("Conflict updating ConfigMap")
             else:
                 LOGGER.exception("Error calling replace_namespaced_config_map")
 
 
 def main():
+    """ Main function """
     configure_logging()
     LOGGER.info(
-        "Updating config_map=%s in namespace=%s for product/version=%s/%s",
+        "Updating ConfigMap=%s in namespace=%s for product/version=%s/%s",
         CONFIG_MAP, CONFIG_MAP_NAMESPACE, PRODUCT, PRODUCT_VERSION
     )
 
@@ -254,7 +258,7 @@ def main():
         )
         raise SystemExit(1)
 
-    elif SET_ACTIVE_VERSION:
+    if SET_ACTIVE_VERSION:
         LOGGER.info(
             "Setting %s:%s to active because SET_ACTIVE_VERSION was set",
             PRODUCT, PRODUCT_VERSION
