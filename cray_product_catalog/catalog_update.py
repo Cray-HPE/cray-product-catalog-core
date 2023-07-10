@@ -29,8 +29,8 @@
 #   {PRODUCT_VERSION}:
 #     {content of yaml file}
 #
-# Since updates to a configmap are not atomic, this script will continue to
-# attempt to update the config map until it has been patched successfully.
+# Since updates to a ConfigMap are not atomic, this script will continue to
+# attempt to update the ConfigMap until it has been patched successfully.
 import logging
 import os
 import random
@@ -53,7 +53,7 @@ from kubernetes import client
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# Parameters to identify config map and content in it to update
+# Parameters to identify ConfigMap and content in it to update
 PRODUCT = os.environ.get("PRODUCT").strip()  # required
 PRODUCT_VERSION = os.environ.get("PRODUCT_VERSION").strip()  # required
 CONFIG_MAP = os.environ.get("CONFIG_MAP", "cray-product-catalog").strip()
@@ -132,13 +132,13 @@ def active_field_exists(product_data):
 
 def update_config_map(data: dict, name, namespace):
     """
-    Get the config map `data` to be added.
+    Get the ConfigMap `data` to be added.
 
-    1. Wait for the config map to be present in the namespace
-    2. Read the config map
-    3. Patch the config_map
-    4. Read back the config_map
-    5. Repeat steps 2-4 if config_map does not include the changes requested,
+    1. Wait for the ConfigMap to be present in the namespace
+    2. Read the ConfigMap
+    3. Patch the ConfigMap
+    4. Read back the ConfigMap
+    5. Repeat steps 2-4 if ConfigMap does not include the changes requested,
        or if step 3 failed due to a conflict.
     """
     k8sclient = ApiClient()
@@ -153,21 +153,21 @@ def update_config_map(data: dict, name, namespace):
 
     while True:
 
-        # Wait a while to check the config map in case multiple products are
-        # attempting to update the same config map, or the config map doesn't
+        # Wait a while to check the ConfigMap in case multiple products are
+        # attempting to update the same ConfigMap, or the ConfigMap doesn't
         # exist yet
         attempt += 1
         sleepy_time = random.randint(1, 3)
         LOGGER.debug("Resting %ss before reading ConfigMap", sleepy_time)
         time.sleep(sleepy_time)
 
-        # Read in the config map
+        # Read in the ConfigMap
         try:
             response = api_instance.read_namespaced_config_map(name, namespace)
         except ApiException as e:
             LOGGER.exception("Error calling read_namespaced_config_map")
 
-            # Config map doesn't exist yet
+            # ConfigMap doesn't exist yet
             if e.status == ERR_NOT_FOUND:
                 LOGGER.warning("ConfigMap %s/%s doesn't exist, attempting again", namespace, name)
                 continue
@@ -175,7 +175,7 @@ def update_config_map(data: dict, name, namespace):
                 raise  # unrecoverable
 
         # Determine if ConfigMap needs to be updated
-        config_map_data = response.data or {}  # if no config map data exists
+        config_map_data = response.data or {}  # if no ConfigMap data exists
         if PRODUCT not in config_map_data:
             LOGGER.info("Product=%s does not exist; will update", PRODUCT)
             config_map_data[PRODUCT] = product_data = {PRODUCT_VERSION: {}}
@@ -189,7 +189,7 @@ def update_config_map(data: dict, name, namespace):
                 product_data[PRODUCT_VERSION] = {}
             # Key with same version exists in ConfigMap
             else:
-                # Data to insert matches data found in configmap.
+                # Data to insert matches data found in ConfigMap.
                 merged_product_data = None
                 if UPDATE_OVERWRITE:
                     product_data[PRODUCT_VERSION] = data
@@ -213,7 +213,7 @@ def update_config_map(data: dict, name, namespace):
                         LOGGER.debug("ConfigMap data updates exist; Exiting")
                         break
 
-        # Patch the config map if needed
+        # Patch the ConfigMap if needed
         product_data[PRODUCT_VERSION] = merge_dict(data, product_data[PRODUCT_VERSION])
         if SET_ACTIVE_VERSION:
             set_active_version(product_data)
@@ -234,9 +234,9 @@ def update_config_map(data: dict, name, namespace):
         except ApiException as e:
             if e.status == ERR_CONFLICT:
                 # A conflict is raised if the resourceVersion field was unexpectedly
-                # incremented, e.g. if another process updated the config map. This
+                # incremented, e.g. if another process updated the ConfigMap. This
                 # provides concurrency protection.
-                LOGGER.warning("Conflict updating config map")
+                LOGGER.warning("Conflict updating ConfigMap")
             else:
                 LOGGER.exception("Error calling replace_namespaced_config_map")
 
@@ -244,7 +244,7 @@ def update_config_map(data: dict, name, namespace):
 def main():
     configure_logging()
     LOGGER.info(
-        "Updating config_map=%s in namespace=%s for product/version=%s/%s",
+        "Updating ConfigMap=%s in namespace=%s for product/version=%s/%s",
         CONFIG_MAP, CONFIG_MAP_NAMESPACE, PRODUCT, PRODUCT_VERSION
     )
 

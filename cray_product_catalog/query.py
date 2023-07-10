@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2021-2022 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -53,8 +53,8 @@ class ProductCatalog:
     """A collection of installed product versions.
 
     Attributes:
-        name (str): The product catalog Kubernetes config map name.
-        namespace (str): The product catalog Kubernetes config map namespace.
+        name (str): The product catalog Kubernetes ConfigMap name.
+        namespace (str): The product catalog Kubernetes ConfigMap namespace.
         products ([InstalledProductVersion]): A list of installed product
             versions.
     """
@@ -79,12 +79,11 @@ class ProductCatalog:
         """Create the ProductCatalog object.
 
         Args:
-            name (str): The name of the product catalog Kubernetes config map.
-            namespace (str): The namespace of the product catalog Kubernetes
-                config map.
+            name (str): The product catalog Kubernetes ConfigMap name.
+            namespace (str): The product catalog Kubernetes ConfigMap namespace.
 
         Raises:
-            ProductCatalogError: if reading the config map failed.
+            ProductCatalogError: if reading the ConfigMap failed.
         """
         self.name = name
         self.namespace = namespace

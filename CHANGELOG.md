@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- CASMCMS-8709: Linting of log messages and code comments to remove inconsistencies.
+
 ### Dependencies
 - Bump `charset-normalizer` from 3.1.0 to 3.2.0 (#254)
 
