@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- Bump `google-auth` from 2.21.0 to 2.22.0 (#258)
+
 ## [1.8.11] - 2023-07-10
 
 ### Changed
