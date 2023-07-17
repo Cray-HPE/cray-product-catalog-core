@@ -1,0 +1,4 @@
+-c constraints.txt
+
+jsonschema
+urllib3
