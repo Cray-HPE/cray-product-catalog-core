@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Dependencies
 - Bump `google-auth` from 2.21.0 to 2.22.0 (#258)
+- Bump `jsonschema` from 4.18.0 to 4.18.2 (#259)
 
 ## [1.8.11] - 2023-07-10
 
