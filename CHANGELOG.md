@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `google-auth` from 2.21.0 to 2.22.0 (#258)
 - Bump `jsonschema` from 4.18.0 to 4.18.3 (#259, #262)
 - Temporarily modify [`Dockerfile`](Dockerfile) procedure used to install `PyYAML` and `kubernetes`, to work around https://github.com/yaml/pyyaml/issues/601 (#263)
+- Revert temporary modifications from previous item (#264)
+- Bump `PyYAML` from 6.0 to 6.0.1 (#264)
+- Pin `pip` version to 23.2 (#264)
+- Pin `setuptools` version to 68.0.0 (#264)
+- Pin `wheel` version to 0.40.0 (#264)
 
 ## [1.8.11] - 2023-07-10
 

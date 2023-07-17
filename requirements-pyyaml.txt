@@ -1,5 +1,0 @@
--c constraints.txt
-
-Cython
-PyYAML
-kubernetes
