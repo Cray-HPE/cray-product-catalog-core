@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- Bump `jsonschema` from 4.18.3 to 4.18.4 (#270)
+
 ## [1.8.12] - 2023-07-18
 
 ### Dependencies
