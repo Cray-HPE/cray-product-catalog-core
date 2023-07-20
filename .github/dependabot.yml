@@ -52,3 +52,14 @@ updates:
       # So we cap urllib3 to be <2.0
       - dependency-name: "urllib3"
         versions: [ ">=2.0.0" ]
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "Cray-HPE/CMS-core-product-support"
+    labels:
+      - "docker-deps"
+      - "dependabot"
+    open-pull-requests-limit: 3
