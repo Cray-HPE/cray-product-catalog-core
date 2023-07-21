@@ -56,7 +56,8 @@ updates:
       - dependency-name: "urllib3"
         versions: [ ">=2.0.0" ]
       # Only look for patch version updates
-      - update-types: ["version-update:semver-major", "version-update:semver-minor" ]
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor" ]
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -72,4 +73,5 @@ updates:
       - dependency-type: "all"
     ignore:
       # Only look for patch version updates
-      - update-types: ["version-update:semver-major", "version-update:semver-minor" ]
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor" ]
