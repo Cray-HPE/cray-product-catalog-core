@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Dependencies
-- Bump `jsonschema` from 4.18.3 to 4.18.4 (#270)
+- Bump `jsonschema` from 4.18.3 to 4.18.6 (#270, [#275](https://github.com/Cray-HPE/cray-product-catalog/pull/275))
 - Bump `pip` from 23.2 to 23.2.1 ([#274](https://github.com/Cray-HPE/cray-product-catalog/pull/274))
 
 ## [1.8.12] - 2023-07-18
