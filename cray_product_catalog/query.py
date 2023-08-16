@@ -36,6 +36,9 @@ from yaml import safe_load, YAMLError
 
 from cray_product_catalog.constants import (
     COMPONENT_DOCKER_KEY,
+    COMPONENT_HELM,
+    COMPONENT_S3,
+    COMPONENT_MANIFESTS,
     COMPONENT_REPOS_KEY,
     COMPONENT_VERSIONS_PRODUCT_MAP_KEY,
     PRODUCT_CATALOG_CONFIG_MAP_NAME,
@@ -213,6 +216,32 @@ class InstalledProductVersion:
         """
         return [(component['name'], component['version'])
                 for component in self.component_data.get(COMPONENT_DOCKER_KEY) or []]
+
+    @property
+    def helm_charts(self):
+        """Get Helm charts associated with this InstalledProductVersion.
+        Returns:
+            A list of tuples of (chart name, chart version)
+        """
+        return [(component['name'], component['version'])
+                for component in self.component_data.get(COMPONENT_HELM) or []]
+
+    @property
+    def s3_artifacts(self):
+        """Get S3 artifacts associated with this InstalledProductVersion.
+        Returns:
+            A list of tuples of (artifact bucket, artifact key)
+        """
+        return [(component['bucket'], component['key'])
+                for component in self.component_data.get(COMPONENT_S3) or []]
+
+    @property
+    def loftsman_manifests(self):
+        """Get Loftsman manifests associated with this InstalledProductVersion.
+        Returns:
+            A list of manifests
+        """
+        return self.component_data.get(COMPONENT_MANIFESTS, [])
 
     @property
     def repositories(self):
