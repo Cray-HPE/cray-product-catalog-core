@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2023-08-16
+
+### Changed
+- CASM-3981: Added S3 artifacts and Loftsman manifests to the Product Catalog schema
+- CASM-3981: Added functions to retrieve Helm charts, S3 artifacts, and Loftsman manifests from the Product Catalog
+- Disabled concurrent Jenkins builds on same branch/commit
+- Added build timeout to avoid hung builds
+
+### Dependencies
+- Bump `jsonschema` from 4.18.3 to 4.18.6 (#270, [#275](https://github.com/Cray-HPE/cray-product-catalog/pull/275))
+- Bump `pip` from 23.2 to 23.2.1 ([#274](https://github.com/Cray-HPE/cray-product-catalog/pull/274))
+
 ## [1.8.12] - 2023-07-18
 
 ### Dependencies
@@ -417,7 +429,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.12...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.9.0...HEAD
+
+[1.9.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.12...v1.9.0
 
 [1.8.12]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.11...v1.8.12
 
