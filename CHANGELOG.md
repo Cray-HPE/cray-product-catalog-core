@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Dependencies
 - Bump `websocket-client` from 1.6.1 to 1.6.2 ([#283](https://github.com/Cray-HPE/cray-product-catalog/pull/283))
 - Bump `tj-actions/changed-files` from 37 to 39 ([#284](https://github.com/Cray-HPE/cray-product-catalog/pull/284), [#287](https://github.com/Cray-HPE/cray-product-catalog/pull/287))
+- Bump `actions/checkout` from 3 to 4 ([#288](https://github.com/Cray-HPE/cray-product-catalog/pull/288))
 
 ## [1.9.0] - 2023-08-16
 
