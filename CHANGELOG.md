@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `actions/checkout` from 3 to 4 ([#288](https://github.com/Cray-HPE/cray-product-catalog/pull/288))
 - Bump `urllib3` from 1.26.16 to 1.26.18 ([#296](https://github.com/Cray-HPE/cray-product-catalog/pull/296), [#300](https://github.com/Cray-HPE/cray-product-catalog/pull/300))
 - Bump `stefanzweifel/git-auto-commit-action` from 4 to 5 ([#298](https://github.com/Cray-HPE/cray-product-catalog/pull/298))
+- Bump `cachetools` from 5.3.1 to 5.3.2 ([#301](https://github.com/Cray-HPE/cray-product-catalog/pull/301))
 
 ## [1.9.0] - 2023-08-16
 
