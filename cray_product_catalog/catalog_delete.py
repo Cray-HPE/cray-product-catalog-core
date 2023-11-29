@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -75,7 +75,7 @@ MAX_RETRIES_FOR_PROD_CM = 10
 
 
 class ModifyConfigMapUtil:
-    """Utility class to manage the config map modification
+    """Utility class to manage the ConfigMap modification
     """
 
     def __init__(self):
@@ -195,16 +195,16 @@ class ModifyConfigMapUtil:
         """
         Method to initiate modification of ConfigMaps.
         Before executing this method make sure to set these properties of the class:
-        *    main_cm # name of main ConfigMap
-        *    product_cm # name of product specific CofigMap
-        *    cm_namespace  # Namespace containing all config map
+        *    main_cm # Name of main ConfigMap
+        *    product_cm # name of product-specific CofigMap
+        *    cm_namespace  # Namespace containing all ConfigMaps
         *    product_name  # Product name
         *    product_version  # Product version
         *    max_reties_for_main_cm  # Max failure retries for main ConfigMap
         *    max_reties_for_prod_cm  # Max failure retries for product ConfigMap
-        *    key  # Key to delete, if you want to execute complete product or a particular version, ignore it
+        *    key  # Key to delete; if you want to execute complete product or a particular version, ignore it
         *    main_cm_fields  # Fields present in main ConfigMap
-        *    product_cm_fields  # Fields present in product specific ConfigMap
+        *    product_cm_fields  # Fields present in product-specific ConfigMap
         """
         if self.__key:
             if self.__key_belongs_to_main_cm_fields():

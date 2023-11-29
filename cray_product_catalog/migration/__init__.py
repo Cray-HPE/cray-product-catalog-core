@@ -24,21 +24,21 @@ File defines few constants
 """
 
 import os
+import re
 from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
-from re import compile
 
-# ConfigMap name for temporary many config map
+# ConfigMap name for temporary main ConfigMap
 CONFIG_MAP_TEMP = "cray-product-catalog-temp"
 
 # namespace for ConfigMaps
 PRODUCT_CATALOG_CONFIG_MAP_NAME = os.environ.get("CONFIG_MAP_NAME", "cray-product-catalog").strip()
 PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE = os.environ.get("CONFIG_MAP_NAMESPACE", "services").strip()
 
-# config map names
+# ConfigMap names
 CRAY_DATA_CATALOG_LABEL = PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
 
 # product ConfigMap pattern
-PRODUCT_CONFIG_MAP_PATTERN = compile('^(cray-product-catalog)-([a-z0-9.-]+)$')
+PRODUCT_CONFIG_MAP_PATTERN = re.compile('^(cray-product-catalog)-([a-z0-9.-]+)$')
 RESOURCE_VERSION = 'resource_version'
 
 retry_count = 10

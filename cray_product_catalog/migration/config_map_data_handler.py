@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #
 # MIT License
 #
@@ -25,20 +24,19 @@
 
 """
 This script splits the data in ConfigMap `cray-product-catalog` into multiple smaller
-ConfigMaps with each product's `component_versions` data in its own Product ConfigMap
+ConfigMaps with each product's `component_versions` data in its own product ConfigMap
 """
 
 import logging
 import yaml
 
-from kubernetes.client.rest import ApiException
 
 from cray_product_catalog.logging import configure_logging
 from cray_product_catalog.util.catalog_data_helper import split_catalog_data, format_product_cm_name
 from cray_product_catalog.migration.kube_apis import KubernetesApi
 from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL
 from cray_product_catalog.migration import (
-    CONFIG_MAP_TEMP, PRODUCT_CATALOG_CONFIG_MAP_NAME, PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE, action
+    CONFIG_MAP_TEMP, PRODUCT_CATALOG_CONFIG_MAP_NAME, PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -119,7 +117,7 @@ class ConfigMapDataHandler:
                 # main_cm_data is not an empty dictionary
                 if main_cm_data:
                     main_versions_data[version_data] = main_cm_data
-            # If `component_versions` data exists for a product, create new product config map
+            # If `component_versions` data exists for a product, create new product ConfigMap
             if product_versions_data:
                 product_config_map_data[product] = yaml.safe_dump(product_versions_data, default_flow_style=False)
                 # create_product_config_map(k8s_obj, product, product_config_map_data)
@@ -133,16 +131,17 @@ class ConfigMapDataHandler:
         return config_map_data, product_config_map_data_list
 
     def rename_config_map(self, rename_from, rename_to, namespace, label):
-        """ Renaming is actually deleting one Config Map and then updating the name of other Config Map and patch it.
-        :param str rename_from: Name of Config Map to rename
-        :param str rename_to: Name of Config Map to be renamed to
-        :param str namespace: namespace in which Config Map has to be updated
-        :param dict label: label of config map to be renamed
+        """ Renaming is actually deleting one ConfigMap and then updating the name of other ConfigMap and patching it.
+        :param str rename_from: Name of ConfigMap to rename
+        :param str rename_to: Name of ConfigMap after rename
+        :param str namespace: Namespace in which ConfigMap has to be updated
+        :param dict label: Label of ConfigMap to be renamed
         :return: bool, If Success True else False
         """
 
         if not self.k8s_obj.delete_config_map(rename_to, namespace):
-            logging.error("Failed to delete ConfigMap %s", rename_to)
+            LOGGER.error("Failed to delete ConfigMap %s", rename_to)
+
             return False
         attempt = 0
         del_failed = False
@@ -159,13 +158,11 @@ class ConfigMapDataHandler:
                 if self.k8s_obj.delete_config_map(rename_from, namespace):
                     LOGGER.info("Renaming ConfigMap successful")
                     return True
-                else:
-                    LOGGER.error("Failed to delete ConfigMap %s, retrying..", rename_from)
-                    del_failed = True
-                    break
-            else:
-                LOGGER.error("Failed to create ConfigMap %s, retrying..", rename_to)
-                continue
+                LOGGER.error("Failed to delete ConfigMap %s, retrying..", rename_from)
+                del_failed = True
+                break
+            LOGGER.error("Failed to create ConfigMap %s, retrying..", rename_to)
+            continue
         # Since only delete of backed up ConfigMap failed, retrying only delete operation
         attempt = 0
         if del_failed:
@@ -173,9 +170,7 @@ class ConfigMapDataHandler:
                 attempt += 1
                 if self.k8s_obj.delete_config_map(rename_from, namespace):
                     break
-                else:
-                    LOGGER.error("Failed to delete ConfigMap %s, retrying..", rename_from)
-                    continue
+                LOGGER.error("Failed to delete ConfigMap %s, retrying..", rename_from)
             # Returning success as migration is successful only backed up ConfigMap is not deleted.
             LOGGER.info("Renaming ConfigMap successful")
             return True

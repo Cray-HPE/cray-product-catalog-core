@@ -21,7 +21,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """
 File contains unit test classes for validating ConfigMap deletion logic.
-Deleting keys/Product or a specific version of a product from ConfigMap
+Deleting keys/product or a specific version of a product from ConfigMap
 """
 import unittest
 from unittest.mock import patch, call
@@ -30,7 +30,7 @@ from cray_product_catalog.catalog_delete import ModifyConfigMapUtil
 
 
 class TestModifyConfigMapUtil(unittest.TestCase):
-    """unittest class for Data catalog ConfigMap deletion logic"""
+    """unittest class for data catalog ConfigMap deletion logic"""
 
     def setUp(self) -> None:
         self.mock_modify_config_map = patch('cray_product_catalog.catalog_delete.modify_config_map').start()

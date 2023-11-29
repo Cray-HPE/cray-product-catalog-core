@@ -30,17 +30,12 @@ import unittest
 from unittest.mock import patch, call, Mock
 from typing import Dict, List
 
-from kubernetes.config import ConfigException
-from kubernetes import client
-from kubernetes.client.api_client import ApiClient
-
 from cray_product_catalog.migration.main import main
 from cray_product_catalog.migration.config_map_data_handler import ConfigMapDataHandler
 from cray_product_catalog.constants import (
     PRODUCT_CATALOG_CONFIG_MAP_NAME, PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE,
     PRODUCT_CATALOG_CONFIG_MAP_LABEL
 )
-from cray_product_catalog.util.catalog_data_helper import format_product_cm_name
 from cray_product_catalog.migration import CONFIG_MAP_TEMP
 from tests.migration.migration_mock import (
     MAIN_CM_DATA_EXPECTED, PROD_CM_DATA_LIST_EXPECTED, INITIAL_MAIN_CM_DATA, MockYaml
@@ -84,7 +79,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
         self.assertEqual(prod_cm_data_list, PROD_CM_DATA_LIST_EXPECTED)
 
     def test_create_product_config_maps(self):
-        """ Validating product config maps are created """
+        """ Validating product ConfigMaps are created """
 
         # mock some additional functions
         self.mock_v1_object_Meta_mig = patch('cray_product_catalog.migration.kube_apis.V1ObjectMeta').start()
@@ -177,7 +172,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                 f"Failed to create product ConfigMap {PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE}/{dummy_prod_cm_names[0]}")
 
     def test_create_temp_config_map(self):
-        """ Validating temp main config map is created """
+        """ Validating temp main ConfigMap is created """
 
         # mock some additional functions
         self.mock_v1_object_Meta_mig = patch('cray_product_catalog.migration.kube_apis.V1ObjectMeta').start()
@@ -198,7 +193,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                 f"Created temp ConfigMap {PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE}/{CONFIG_MAP_TEMP}")
 
     def test_create_temp_config_map_failed(self):
-        """ Validating temp main config map creation failed """
+        """ Validating temp main ConfigMap creation failed """
 
         # mock some additional functions
         self.mock_v1_object_Meta_mig = patch('cray_product_catalog.migration.kube_apis.V1ObjectMeta').start()
@@ -220,7 +215,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                 f"Creating ConfigMap {PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE}/{CONFIG_MAP_TEMP} failed")
 
     def test_rename_config_map(self):
-        """ Validating product config maps are created """
+        """ Validating product ConfigMaps are created """
 
         with self.assertLogs(level="DEBUG") as captured:
             # call method under test
@@ -255,7 +250,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                 "Renaming ConfigMap successful")
 
     def test_rename_config_map_failed_1(self):
-        """ Validating rename config map failure scenario where:
+        """ Validating rename ConfigMap failure scenario where:
             deleting cray-product-catalog ConfigMap failed. """
 
         with self.assertLogs() as captured:
@@ -275,7 +270,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                 f"Failed to delete ConfigMap {PRODUCT_CATALOG_CONFIG_MAP_NAME}")
 
     def test_rename_config_map_failed_2(self):
-        """ Validating rename config map failure scenario where:
+        """ Validating rename ConfigMap failure scenario where:
             creating cray-product-catalog ConfigMap failed. """
 
         with self.assertLogs(level="DEBUG") as captured:
@@ -329,7 +324,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                 f"Failed to create ConfigMap {PRODUCT_CATALOG_CONFIG_MAP_NAME}, retrying..")
 
     def test_rename_config_map_failed_3(self):
-        """ Validating rename config map failure scenario where:
+        """ Validating rename ConfigMap failure scenario where:
             first operation of deleting cray-product-catalog-temp ConfigMap failed but later passed. """
 
         with self.assertLogs(level="DEBUG") as captured:
@@ -362,10 +357,10 @@ class TestConfigMapDataHandler(unittest.TestCase):
                         f"Failed to delete ConfigMap {CONFIG_MAP_TEMP}, retrying..")
             self.assertEqual(
                         captured.records[1].getMessage(),
-                        f"Renaming ConfigMap successful")
+                        "Renaming ConfigMap successful")
 
     def test_rename_config_map_failed_4(self):
-        """ Validating rename config map failure scenario where:
+        """ Validating rename ConfigMap failure scenario where:
             everytime deleting cray-product-catalog-temp ConfigMap failed. """
 
         with self.assertLogs(level="DEBUG") as captured:
@@ -399,7 +394,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                         f"Failed to delete ConfigMap {CONFIG_MAP_TEMP}, retrying..")
             self.assertEqual(
                         captured.records[-1].getMessage(),
-                        f"Renaming ConfigMap successful")
+                        "Renaming ConfigMap successful")
 
     def test_main_for_successful_migration(self):
         """Validating that migration is successful"""
@@ -428,7 +423,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
 
             self.assertEqual(
                         captured.records[-1].getMessage(),
-                        f"Migration successful")
+                        "Migration successful")
 
     def test_main_failed_1(self):
         """Validating that migration failed as renaming failed"""
@@ -457,12 +452,12 @@ class TestConfigMapDataHandler(unittest.TestCase):
             main()
 
             self.assertTrue(
-              f"Renaming cray-product-catalog-temp to cray-product-catalog ConfigMap failed, "
-              f"calling rollback handler..." in captured.exception
+              "Renaming cray-product-catalog-temp to cray-product-catalog ConfigMap failed, "
+              "calling rollback handler..." in captured.exception
             )
 
             self.assertTrue(
-              "rollback successful" in captured.exception
+              "Rollback successful" in captured.exception
             )
 
     def test_main_failed_2(self):
@@ -491,13 +486,13 @@ class TestConfigMapDataHandler(unittest.TestCase):
             main()
 
             self.assertTrue(
-              "rollback successful" in captured.exception
+              "Rollback successful" in captured.exception
             )
 
             self.mock_rename_cm.assert_not_called()
 
     def test_main_failed_3(self):
-        """Validating that migration failed as create product config maps failed"""
+        """Validating that migration failed as create product ConfigMaps failed"""
 
         self.mock_migrate_config_map = patch(
             'cray_product_catalog.migration.config_map_data_handler.ConfigMapDataHandler.migrate_config_map_data'
@@ -521,7 +516,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
             main()
 
             self.assertTrue(
-              "rollback successful" in captured.exception
+              "Rollback successful" in captured.exception
             )
 
             self.mock_create_temp_cm.assert_not_called()
@@ -622,7 +617,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
             )
 
             self.assertTrue(
-              "rollback successful" in captured.exception
+              "Rollback successful" in captured.exception
             )
 
             self.assertTrue(
@@ -668,7 +663,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
             )
             self.assertEqual(
                 captured.records[6].getMessage(),
-                "rollback successful"
+                "Rollback successful"
             )
 
             self.assertEqual(

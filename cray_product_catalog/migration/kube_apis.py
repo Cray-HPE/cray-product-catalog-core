@@ -37,19 +37,10 @@ from urllib3.exceptions import MaxRetryError
 from cray_product_catalog.logging import configure_logging
 from cray_product_catalog.util.k8s import load_k8s
 from . import retry_count
-# retry_count=10
-
-# from kubernetes import configs
-# def load_k8s():
-#     """ Load Kubernetes configuration """
-#     try:
-#         config.load_incluster_config()
-#     except Exception:
-#         config.load_kube_config()
 
 
 class KubernetesApi:
-    """Class for wrapping Kubernetes api"""
+    """Class for wrapping Kubernetes API"""
     def __init__(self):
         configure_logging()
         self.logger = logging.getLogger(__name__)
@@ -64,11 +55,11 @@ class KubernetesApi:
         self.api_instance = client.CoreV1Api(self.kclient)
 
     def create_config_map(self, name, namespace, data, label):
-        """Creates Config Map
-        :param dict data: Content of configmap
-        :param str name: config map name to be created
-        :param str namespace: namespace in which configmap has to be created
-        :param dict label: label with which configmap has to be created
+        """Creates ConfigMap
+        :param dict data: Content of ConfigMap
+        :param str name: ConfigMap name to be created
+        :param str namespace: Namespace in which ConfigMap has to be created
+        :param dict label: Label with which ConfigMap has to be created
         :return: bool
         """
         try:
@@ -84,35 +75,45 @@ class KubernetesApi:
             )
             return True
         except MaxRetryError as err:
-            self.logger.exception('MaxRetryError - Error: {0}'.format(err))
+            self.logger.exception('MaxRetryError: %s', err)
             return False
         except ApiException as err:
-            self.logger.exception('ApiException- Error:{0}'.format(err))
+            # The full string representation of ApiException is very long, so just log err.reason.
+            self.logger.exception('ApiException: %s', err.reason)
             return False
+        self.logger.error('Unknown error creating ConfigMap')
+        return False
+        self.logger.error('Unknown error creating ConfigMap')
+        return False
 
     def list_config_map(self, namespace, label):
-        """ Reads all the Config Map with certain label in particular namespace
-        :param str namespace: Value of namespace from where config map has to be listed
-        :param str label: string format of label "type=xyz"
+        """ Reads all the ConfigMaps with certain label in particular namespace
+        :param str namespace: Value of namespace from where ConfigMap has to be listed
+        :param str label: String format of label "type=xyz"
         :return: V1ConfigMapList
                  If there is any error, returns None
         """
         if not all((label, namespace)):
-            self.logger.info("Either label or namespace is empty, not reading config map.")
+            self.logger.info("Either label or namespace is empty, not reading ConfigMap.")
             return None
         try:
             return self.api_instance.list_namespaced_config_map(namespace, label_selector=label).items
         except MaxRetryError as err:
-            self.logger.exception('MaxRetryError - Error: {0}'.format(err))
+            self.logger.exception('MaxRetryError: %s', err)
             return None
         except ApiException as err:
-            self.logger.exception('ApiException- Error:{0}'.format(err))
+            # The full string representation of ApiException is very long, so just log err.reason.
+            self.logger.exception('ApiException: %s', err.reason)
             return None
+        self.logger.error('Unknown error listing ConfigMaps')
+        return None
+        self.logger.error('Unknown error listing ConfigMaps')
+        return None
 
     def list_config_map_names(self, namespace, label):
-        """ Reads all the Config Map with certain label in particular namespace
-        :param str namespace: Value of namespace from where config map has to be listed
-        :param str label: string format of label "type=xyz"
+        """ Reads all the ConfigMaps with certain label in particular namespace
+        :param str namespace: Value of namespace from where ConfigMap has to be listed
+        :param str label: String format of label "type=xyz"
         :return: [str]
         """
         cm_output = self.list_config_map(namespace, label)
@@ -132,37 +133,45 @@ class KubernetesApi:
         return list_cm_names
 
     def read_config_map(self, name, namespace):
-        """Reads config Map based on provided name and namespace
-        :param Str name: name of ConfigMap to read
-        :param Str namespace: namespace from which Config Map has to be read
+        """Reads ConfigMap based on provided name and namespace
+        :param Str name: Name of ConfigMap to read
+        :param Str namespace: Namespace from which ConfigMap has to be read
         :return: V1ConfigMap
                  Returns None in case of any error
         """
         # Check if both values are not empty
         if not all((name, namespace)):
-            self.logger.exception("Either name or namespace is empty, not reading config map.")
+            self.logger.exception("Either name or namespace is empty, not reading ConfigMap.")
             return None
         try:
             return self.api_instance.read_namespaced_config_map(name, namespace)
         except MaxRetryError as err:
-            self.logger.exception('MaxRetryError - Error: {0}'.format(err))
+            self.logger.exception('MaxRetryError: %s', err)
             return None
         except ApiException as err:
-            self.logger.exception('ApiException- Error:{0}'.format(err))
+            # The full string representation of ApiException is very long, so just log err.reason.
+            self.logger.exception('ApiException: %s', err.reason)
             return None
+        self.logger.error('Unknown error reading ConfigMap')
+        return None
+        self.logger.error('Unknown error reading ConfigMap')
+        return None
 
     def delete_config_map(self, name, namespace):
-        """Delete the Config Map
-        :param Str name: name of ConfigMap to be deleted
-        :param Str namespace: namespace from which Config Map has to be deleted
+        """Delete the ConfigMap
+        :param Str name: Name of ConfigMap to be deleted
+        :param Str namespace: Namespace from which ConfigMap has to be deleted
         :return: bool; If success True else False
         """
         try:
             self.api_instance.delete_namespaced_config_map(name, namespace)
             return True
         except MaxRetryError as err:
-            self.logger.exception('MaxRetryError - Error: {0}'.format(err))
+            self.logger.exception('MaxRetryError: %s', err)
             return False
         except ApiException as err:
-            self.logger.exception('ApiException- Error:{0}'.format(err))
+            # The full string representation of ApiException is very long, so just log err.reason.
+            self.logger.exception('ApiException: %s', err.reason)
             return False
+        self.logger.error('Unknown error deleting ConfigMap')
+        return False

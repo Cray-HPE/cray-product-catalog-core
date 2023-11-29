@@ -30,7 +30,7 @@ from cray_product_catalog.migration.config_map_data_handler import ConfigMapData
 from cray_product_catalog.migration import (
     PRODUCT_CATALOG_CONFIG_MAP_NAME,
     PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE,
-    CONFIG_MAP_TEMP, RESOURCE_VERSION
+    CONFIG_MAP_TEMP
 )
 from cray_product_catalog.migration.exit_handler import ExitHandler
 
@@ -63,7 +63,7 @@ def main():
             else:
                 config_map_data = response.data
         else:
-            LOGGER.info("Error reading ConfigMap, exiting migration process...")
+            LOGGER.error("Error reading ConfigMap, exiting migration process...")
             raise SystemExit(1)
 
         try:
@@ -94,8 +94,7 @@ def main():
                 LOGGER.error("Error reading resourceVersion, exiting migration process...")
                 exit_handler.rollback()
                 raise SystemExit(1)
-            else:
-                curr_resource_version = response.metadata.resource_version
+            curr_resource_version = response.metadata.resource_version
 
         if curr_resource_version != init_resource_version:
             migration_failed = True
@@ -104,8 +103,7 @@ def main():
             LOGGER.info("Re-trying migration process...")
             exit_handler.rollback()
             continue
-        else:
-            break
+        break
 
     if migration_failed:
         LOGGER.info("ConfigMap %s is modified by other process, exiting migration process...",

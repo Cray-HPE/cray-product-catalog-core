@@ -21,8 +21,8 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 """
 File contains logic to handle exit scenarios:
-a. graceful
-b. non-graceful
+a. Graceful
+b. Non-graceful
 c. Rollback case
 """
 
@@ -40,22 +40,21 @@ LOGGER = logging.getLogger(__name__)
 
 
 def _is_product_config_map(config_map_name: str) -> bool:
-    """Function to check product config map pattern
-    returns True if pattern match found
+    """Function to check product ConfigMap pattern.
+    Returns True if pattern match found
     """
     if config_map_name is None or config_map_name == "":
         return False
-    elif fullmatch(PRODUCT_CONFIG_MAP_PATTERN, config_map_name):
+    if fullmatch(PRODUCT_CONFIG_MAP_PATTERN, config_map_name):
         return True
-    else:
-        return False
+    return False
 
 
 class ExitHandler:
     """Class to handle exit and rollback classes"""
 
     def __init__(self):
-        self.k8api = KubernetesApi()  # kubernetes API object
+        self.k8api = KubernetesApi()  # Kubernetes API object
 
     @staticmethod
     def graceful_exit() -> None:
@@ -66,7 +65,7 @@ class ExitHandler:
         LOGGER.error("Migration not possible, exception occurred.")
 
     def __get_all_created_product_config_maps(self) -> List:
-        """Get all created product config maps"""
+        """Get all created product ConfigMaps"""
         cm_name = filter(_is_product_config_map,
                          self.k8api.list_config_map_names(
                              label=CRAY_DATA_CATALOG_LABEL,
@@ -76,22 +75,22 @@ class ExitHandler:
 
     def rollback(self):
         """Method to handle roll back
-        1. Deleting temp config map
-        2. Deleting all created product config map
+        1. Deleting temporary ConfigMap
+        2. Deleting all created product ConfigMaps
         """
         LOGGER.warning("Initiating rollback")
-        product_config_maps = self.__get_all_created_product_config_maps()  # collecting product config map
+        product_config_maps = self.__get_all_created_product_config_maps()  # collecting product ConfigMaps
 
-        LOGGER.info("deleting Product ConfigMaps")  # attempting to delete product config maps
+        LOGGER.info("Deleting product ConfigMaps")  # attempting to delete product ConfigMaps
         non_deleted_product_config_maps = []
         for config_map in product_config_maps:
-            LOGGER.debug("deleting Product ConfigMap %s", config_map)
+            LOGGER.debug("Deleting product ConfigMap %s", config_map)
             if not self.k8api.delete_config_map(name=config_map, namespace=PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE):
                 non_deleted_product_config_maps.append(config_map)
 
-        if len(non_deleted_product_config_maps) > 0:  # checking if any product config map is not deleted
-            LOGGER.error("Error in deleting ConfigMap/s %s. Delete this/these manually",
+        if non_deleted_product_config_maps:  # checking if any product ConfigMap is not deleted
+            LOGGER.error("Error deleting ConfigMaps: %s. Delete these manually",
                          non_deleted_product_config_maps)
             return
 
-        LOGGER.info("rollback successful")
+        LOGGER.info("Rollback successful")

@@ -25,7 +25,6 @@
 """Unit tests for cray_product_catalog.catalog_update module"""
 
 import unittest
-import os
 from unittest import mock
 from tests.mock_update_catalog import (
     UPDATE_DATA, ApiInstance, ApiException
@@ -76,7 +75,7 @@ class TestCatalogUpdate(unittest.TestCase):
             try:
                 # call method under test
                 create_config_map(ApiInstance(raise_exception=True), name, namespace)
-            except ApiException as err:
+            except ApiException:
                 pass
             self.assertEqual(len(captured.records), 1)  # check that there is only one log message
             self.assertEqual(captured.records[0].getMessage(),

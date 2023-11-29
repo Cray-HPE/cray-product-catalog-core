@@ -25,8 +25,8 @@
 Mock data for ProductCatalog and InstalledProductVersion unit tests
 """
 
-from yaml import safe_dump
 import datetime
+from yaml import safe_dump
 
 from cray_product_catalog.query import InstalledProductVersion
 
@@ -76,8 +76,10 @@ SAT_VERSIONS = {
 
 # Two versions of a product named COS where:
 # - The two versions have one docker image name and version in common
-# - The first version has docker and manifests but not helm charts, repositories, configuration, images, or recipes
-# - The second version has docker, helm charts, repositories, configuration, images, and recipes, but not manifests
+# - The first version has docker images and manifests but not helm charts, repositories, configuration,
+#   images, or recipes
+# - The second version has docker images, helm charts, repositories, configuration, images, and recipes,
+#   but not manifests
 COS_VERSIONS = {
     '2.0.0': {
         'component_versions': {
@@ -212,9 +214,9 @@ MOCK_PRODUCT_CATALOG_DATA = {
 
 # A mock version of the data returned after loading the ConfigMap data
 MOCK_PRODUCTS = \
-    [InstalledProductVersion('sat', version, SAT_VERSIONS.get(version)) for version in SAT_VERSIONS.keys()] + \
-    [InstalledProductVersion('cos', version, COS_VERSIONS.get(version)) for version in COS_VERSIONS.keys()] + \
-    [InstalledProductVersion('cpe', version, CPE_VERSION.get(version)) for version in CPE_VERSION.keys()] + \
+    [InstalledProductVersion('sat', version, SAT_VERSIONS.get(version)) for version in SAT_VERSIONS] + \
+    [InstalledProductVersion('cos', version, COS_VERSIONS.get(version)) for version in COS_VERSIONS] + \
+    [InstalledProductVersion('cpe', version, CPE_VERSION.get(version)) for version in CPE_VERSION] + \
     [InstalledProductVersion('other_product', version, OTHER_PRODUCT_VERSION.get(version))
      for version in OTHER_PRODUCT_VERSION.keys()]
 

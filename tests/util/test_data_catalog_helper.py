@@ -25,13 +25,13 @@ Unit tests for the cray_product_catalog.util.catalog_data_helper module
 """
 
 import unittest
+import yaml
+from typing import Dict
 from tests.mocks import (
   YAML_DATA, YAML_DATA_MISSING_MAIN_DATA,
   YAML_DATA_MISSING_PROD_CM_DATA,
   MAIN_CM_DATA, PROD_CM_DATA
 )
-import yaml
-from typing import Dict
 from cray_product_catalog.util.catalog_data_helper import split_catalog_data, format_product_cm_name
 
 

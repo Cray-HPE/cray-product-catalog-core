@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -25,9 +25,9 @@
 Mock data for catalog_update unit tests
 """
 
-from kubernetes.client.rest import ApiException
 import os
 from unittest import mock
+import kubernetes.client.rest
 from tests.mocks import COS_VERSIONS, Name
 
 # Mocking environment variables before import so that:
@@ -65,11 +65,13 @@ class Response:
         self.metadata = Name()
 
 
-class ApiException(ApiException):
+class ApiException(kubernetes.client.rest.ApiException):
     """
     Custom Exception to define status
     """
     def __init__(self):
+        super().__init__()
+        super().__init__()
         self.status = ERR_NOT_FOUND
 
 
@@ -83,28 +85,24 @@ class ApiInstance():
 
     def create_namespaced_config_map(self, namespace='a', body='b'):
         """
-        Dummy Function to raise exception, if needed
+        Dummy function to raise exception, if needed
         """
         if self.raise_exception:
             raise ApiException()
-        else:
-            pass
 
     def read_namespaced_config_map(self, name, namespace):
         """
-        Dummy Function to :
+        Dummy function to :
         1. Raise exception
-        2. generate and return proper response with data and metadata
+        2. Generate and return proper response with data and metadata
         """
         # if this is called for first time return exception, so that product cm is created.
         if self.count == 0:
             self.count += 1
             raise ApiException()
-        else:
-            return Response()
+        return Response()
 
     def patch_namespaced_config_map(self, name, namespace, body='xxx'):
         """
-        Dummy function to handle the call in code, does nothing
+        Dummy function to handle the call in code; does nothing
         """
-        pass
