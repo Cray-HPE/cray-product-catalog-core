@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2023-11-29
+
+### Dependencies
+- Bump `websocket-client` from 1.6.1 to 1.6.4 ([#283](https://github.com/Cray-HPE/cray-product-catalog/pull/283), [#293](https://github.com/Cray-HPE/cray-product-catalog/pull/293), [#299](https://github.com/Cray-HPE/cray-product-catalog/pull/299))
+- Bump `tj-actions/changed-files` from 37 to 40 ([#284](https://github.com/Cray-HPE/cray-product-catalog/pull/284), [#287](https://github.com/Cray-HPE/cray-product-catalog/pull/287), [#302](https://github.com/Cray-HPE/cray-product-catalog/pull/302))
+- Bump `actions/checkout` from 3 to 4 ([#288](https://github.com/Cray-HPE/cray-product-catalog/pull/288))
+- Bump `urllib3` from 1.26.16 to 1.26.18 ([#296](https://github.com/Cray-HPE/cray-product-catalog/pull/296), [#300](https://github.com/Cray-HPE/cray-product-catalog/pull/300))
+- Bump `stefanzweifel/git-auto-commit-action` from 4 to 5 ([#298](https://github.com/Cray-HPE/cray-product-catalog/pull/298))
+- Bump `cachetools` from 5.3.1 to 5.3.2 ([#301](https://github.com/Cray-HPE/cray-product-catalog/pull/301))
+- Bump `pyasn1` from 0.5.0 to 0.5.1 ([#303](https://github.com/Cray-HPE/cray-product-catalog/pull/303))
+
 ## [1.9.0] - 2023-08-16
 
 ### Changed
@@ -429,7 +440,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.0...HEAD
+
+[1.10.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.9.0...v1.10.0
 
 [1.9.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.12...v1.9.0
 
