@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2023-11-29
+
 ### Dependencies
 - Bump `websocket-client` from 1.6.1 to 1.6.4 ([#283](https://github.com/Cray-HPE/cray-product-catalog/pull/283), [#293](https://github.com/Cray-HPE/cray-product-catalog/pull/293), [#299](https://github.com/Cray-HPE/cray-product-catalog/pull/299))
 - Bump `tj-actions/changed-files` from 37 to 40 ([#284](https://github.com/Cray-HPE/cray-product-catalog/pull/284), [#287](https://github.com/Cray-HPE/cray-product-catalog/pull/287), [#302](https://github.com/Cray-HPE/cray-product-catalog/pull/302))
@@ -438,7 +440,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.0...HEAD
+
+[1.10.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.9.0...v1.10.0
 
 [1.9.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.8.12...v1.9.0
 
