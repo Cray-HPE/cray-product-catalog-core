@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2021-2022 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -60,7 +60,8 @@ setup(
     entry_points={
         'console_scripts': [
             'catalog_delete=cray_product_catalog.catalog_delete:main',
-            'catalog_update=cray_product_catalog.catalog_update:main'
+            'catalog_update=cray_product_catalog.catalog_update:main',
+            'catalog_migrate=cray_product_catalog.migration.main:main',
         ]
     }
 )

@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -19,25 +19,28 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-#
-
 """
-Defines constants used when querying the product catalog.
+File defines few constants
 """
 
-PRODUCT_CATALOG_CONFIG_MAP_NAME = 'cray-product-catalog'
-PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE = 'services'
-COMPONENT_VERSIONS_PRODUCT_MAP_KEY = 'component_versions'
-COMPONENT_REPOS_KEY = 'repositories'
-COMPONENT_DOCKER_KEY = 'docker'
-COMPONENT_HELM = 'helm'
-COMPONENT_S3 = 's3'
-COMPONENT_MANIFESTS = 'manifests'
-CONFIG_MAP_FIELDS = {'configuration', 'images', 'recipes'}
-PRODUCT_CM_FIELDS = {'component_versions'}
-PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY = 'type'
-PRODUCT_CATALOG_CONFIG_MAP_LABEL = {PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY: PRODUCT_CATALOG_CONFIG_MAP_NAME}
-PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR = "{0}={1}".format(
-    PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY, PRODUCT_CATALOG_CONFIG_MAP_NAME
-    )
-PRODUCT_CATALOG_CONFIG_MAP_REPLICA = 'cray-product-catalog-temp'
+import os
+from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+from re import compile
+
+# ConfigMap name for temporary many config map
+CONFIG_MAP_TEMP = "cray-product-catalog-temp"
+
+# namespace for ConfigMaps
+PRODUCT_CATALOG_CONFIG_MAP_NAME = os.environ.get("CONFIG_MAP_NAME", "cray-product-catalog").strip()
+PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE = os.environ.get("CONFIG_MAP_NAMESPACE", "services").strip()
+
+# config map names
+CRAY_DATA_CATALOG_LABEL = PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+
+# product ConfigMap pattern
+PRODUCT_CONFIG_MAP_PATTERN = compile('^(cray-product-catalog)-([a-z0-9.-]+)$')
+RESOURCE_VERSION = 'resource_version'
+
+retry_count = 10
+role_name = 'cray-product-catalog'
+action = 'update'

@@ -43,9 +43,11 @@ from cray_product_catalog.constants import (
     COMPONENT_VERSIONS_PRODUCT_MAP_KEY,
     PRODUCT_CATALOG_CONFIG_MAP_NAME,
     PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE,
+    PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
 )
 from cray_product_catalog.schema.validate import validate
 from cray_product_catalog.util import load_k8s
+from cray_product_catalog.util.merge_dict import merge_dict
 
 LOGGER = logging.getLogger(__name__)
 
@@ -94,28 +96,26 @@ class ProductCatalog:
         self.namespace = namespace
         self.k8s_client = self._get_k8s_api()
         try:
-            config_map = self.k8s_client.read_namespaced_config_map(name, namespace)
+            configmaps = self.k8s_client.list_namespaced_config_map(
+                namespace, label_selector=PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+            ).items
         except MaxRetryError as err:
             raise ProductCatalogError(
-                f'Unable to connect to Kubernetes to read {namespace}/{name} ConfigMap: {err}'
+                f'Unable to connect to Kubernetes to read {namespace} namespace: {err}'
             ) from err
         except ApiException as err:
             # The full string representation of ApiException is very long, so just log err.reason.
             raise ProductCatalogError(
-                f'Error reading {namespace}/{name} ConfigMap: {err.reason}'
+                f'Error listing ConfigMaps in {namespace} namespace: {err.reason}'
             ) from err
 
-        if config_map.data is None:
+        if len(configmaps) == 0:
             raise ProductCatalogError(
-                f'No data found in {namespace}/{name} ConfigMap.'
+                f'No ConfigMaps found in {namespace} namespace.'
             )
 
         try:
-            self.products = [
-                InstalledProductVersion(product_name, product_version, product_version_data)
-                for product_name, product_versions in config_map.data.items()
-                for product_version, product_version_data in safe_load(product_versions).items()
-            ]
+            self.products = load_config_map_data(self.name, configmaps)
         except YAMLError as err:
             raise ProductCatalogError(
                 f'Failed to load ConfigMap data: {err}'
@@ -125,7 +125,7 @@ class ProductCatalog:
             str(p) for p in self.products if not p.is_valid
         ]
         if invalid_products:
-            LOGGER.debug(
+            LOGGER.warning(
                 'The following products have product catalog data that is not valid against the expected schema: %s',
                 ", ".join(invalid_products)
             )
@@ -174,6 +174,32 @@ class ProductCatalog:
         return matching_products[0]
 
 
+def load_config_map_data(name, configmaps):
+    """Parse list_namespaced_config_map output and get array of InstalledProductVersion objects.
+
+    Args:
+        configmaps (V1ConfigMapList): list of ConfigMap objects.
+
+    Returns:
+        An array of InstalledProductVersion objects.
+    """
+    config_map_data = {}
+    for cm in configmaps:
+        if not cm.metadata.name.startswith(name):
+            continue
+        for product_name, product_versions in cm.data.items():
+            for product_version, product_version_data in safe_load(product_versions).items():
+                cm_key = product_name + ':' + product_version
+                if cm_key in config_map_data:
+                    config_map_data[cm_key] = merge_dict(config_map_data[cm_key], product_version_data)
+                else:
+                    config_map_data[cm_key] = product_version_data
+    return [
+        InstalledProductVersion(key.split(':',)[0], key.split(':')[1], product_version_data)
+        for key, product_version_data in config_map_data.items()
+    ]
+
+
 class InstalledProductVersion:
     """A representation of a version of a product that is currently installed.
 
@@ -218,10 +244,11 @@ class InstalledProductVersion:
                 for component in self.component_data.get(COMPONENT_DOCKER_KEY) or []]
 
     @property
-    def helm_charts(self):
+    def helm(self):
         """Get Helm charts associated with this InstalledProductVersion.
+
         Returns:
-            A list of tuples of (chart name, chart version)
+            A list of tuples of (chart_name, chart_version)
         """
         return [(component['name'], component['version'])
                 for component in self.component_data.get(COMPONENT_HELM) or []]
@@ -229,6 +256,7 @@ class InstalledProductVersion:
     @property
     def s3_artifacts(self):
         """Get S3 artifacts associated with this InstalledProductVersion.
+
         Returns:
             A list of tuples of (artifact bucket, artifact key)
         """
@@ -238,6 +266,7 @@ class InstalledProductVersion:
     @property
     def loftsman_manifests(self):
         """Get Loftsman manifests associated with this InstalledProductVersion.
+
         Returns:
             A list of manifests
         """

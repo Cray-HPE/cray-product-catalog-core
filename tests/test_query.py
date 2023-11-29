@@ -31,16 +31,18 @@ import unittest
 from unittest.mock import Mock, patch
 
 from kubernetes.config import ConfigException
-from yaml import safe_dump
 
 from cray_product_catalog.query import (
     ProductCatalog,
     InstalledProductVersion,
     ProductCatalogError
 )
+
+from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+
 from tests.mocks import (
-    COS_VERSIONS, MOCK_PRODUCT_CATALOG_DATA, SAT_VERSIONS,
-    CPE_VERSION, MOCK_INVALID_PRODUCT_DATA
+    COS_VERSIONS, SAT_VERSIONS, CPE_VERSION, MOCK_PRODUCT_CATALOG_DATA,
+    MOCK_INVALID_PRODUCT_DATA, MOCK_PRODUCTS, MockInvalidYaml
 )
 
 
@@ -79,7 +81,7 @@ class TestProductCatalog(unittest.TestCase):
         """Set up mocks."""
         self.mock_k8s_api = patch.object(ProductCatalog, '_get_k8s_api').start().return_value
         self.mock_product_catalog_data = copy.deepcopy(MOCK_PRODUCT_CATALOG_DATA)
-        self.mock_k8s_api.read_namespaced_config_map.return_value = Mock(data=self.mock_product_catalog_data)
+        self.mock_k8s_api.list_namespaced_config_map.return_value = Mock(items=self.mock_product_catalog_data)
 
     def tearDown(self):
         """Stop patches."""
@@ -87,12 +89,16 @@ class TestProductCatalog(unittest.TestCase):
 
     def create_and_assert_product_catalog(self):
         """Assert the product catalog was created as expected."""
-        product_catalog = ProductCatalog('mock-name', 'mock-namespace')
-        self.mock_k8s_api.read_namespaced_config_map.assert_called_once_with('mock-name', 'mock-namespace')
+        product_catalog = ProductCatalog('cray-product-catalog', 'mock-namespace')
+        self.mock_k8s_api.list_namespaced_config_map.assert_called_once_with(
+            'mock-namespace', label_selector=PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+        )
         return product_catalog
 
     def test_create_product_catalog(self):
         """Test creating a simple ProductCatalog."""
+        self.mock_load_config_map_data = patch('cray_product_catalog.query.load_config_map_data').start()
+        self.mock_load_config_map_data.return_value = MOCK_PRODUCTS
         product_catalog = self.create_and_assert_product_catalog()
         expected_names_and_versions = [
             (name, version) for name in ('sat', 'cos') for version in ('2.0.0', '2.0.1')
@@ -104,26 +110,32 @@ class TestProductCatalog(unittest.TestCase):
 
     def test_create_product_catalog_invalid_product_data(self):
         """Test creating a ProductCatalog when the product catalog contains invalid YAML."""
-        self.mock_product_catalog_data['sat'] = '\t'
+        self.mock_k8s_api.list_namespaced_config_map.return_value = Mock(items=[MockInvalidYaml()])
         with self.assertRaisesRegex(ProductCatalogError, 'Failed to load ConfigMap data'):
             self.create_and_assert_product_catalog()
 
     def test_create_product_catalog_null_data(self):
         """Test creating a ProductCatalog when the product catalog contains null data."""
-        self.mock_k8s_api.read_namespaced_config_map.return_value = Mock(data=None)
+        self.mock_load_config_map_data = patch('cray_product_catalog.query.load_config_map_data').start()
+        self.mock_load_config_map_data.return_value = []
+        self.mock_k8s_api.list_namespaced_config_map.return_value = Mock(items=[])
         with self.assertRaisesRegex(ProductCatalogError,
-                                    'No data found in mock-namespace/mock-name ConfigMap.'):
+                                    'No ConfigMaps found in mock-namespace namespace.'):
             self.create_and_assert_product_catalog()
 
     def check_for_invalid_product_schema(self, prod, ver):
         """Check for an ProductCatalog entry containing valid YAML but does not match schema.
+
         Args:
             prod (string): Product Name
             ver (string): Product version
         """
-        mock_data = {prod: safe_dump(MOCK_INVALID_PRODUCT_DATA.get(prod))}
-        self.mock_k8s_api.read_namespaced_config_map.return_value = Mock(data=mock_data)
-
+        self.mock_load_config_map_data = patch('cray_product_catalog.query.load_config_map_data').start()
+        self.mock_load_config_map_data.return_value = [
+            InstalledProductVersion(prod, ver, MOCK_INVALID_PRODUCT_DATA.get(prod).get(ver))
+        ]
+        self.mock_k8s_api.list_namespaced_config_map.return_value = Mock(items=[
+            MOCK_INVALID_PRODUCT_DATA.get(prod).get(ver)])
         with self.assertLogs(level=logging.DEBUG) as logs_cm:
             product_catalog = self.create_and_assert_product_catalog()
 
@@ -156,6 +168,8 @@ class TestProductCatalog(unittest.TestCase):
 
     def test_get_matching_product(self):
         """Test getting a particular product by name/version."""
+        self.mock_load_config_map_data = patch('cray_product_catalog.query.load_config_map_data').start()
+        self.mock_load_config_map_data.return_value = MOCK_PRODUCTS
         product_catalog = self.create_and_assert_product_catalog()
         expected_matching_name_and_version = ('cos', '2.0.0')
         actual_matching_product = product_catalog.get_product('cos', '2.0.0')
@@ -167,6 +181,8 @@ class TestProductCatalog(unittest.TestCase):
 
     def test_get_latest_matching_product(self):
         """Test getting the latest version of a product"""
+        self.mock_load_config_map_data = patch('cray_product_catalog.query.load_config_map_data').start()
+        self.mock_load_config_map_data.return_value = MOCK_PRODUCTS
         product_catalog = self.create_and_assert_product_catalog()
         expected_matching_name_and_version = ('sat', '2.0.1')
         actual_matching_product = product_catalog.get_product('sat')
@@ -226,7 +242,7 @@ class TestInstalledProductVersion(unittest.TestCase):
             ('cray-cps', '1.8.15')
         ]
         self.assertEqual(
-            expected_helm_charts_versions, self.installed_product_version.helm_charts
+            expected_helm_charts_versions, self.installed_product_version.helm
         )
 
     def test_no_helm_charts(self):
@@ -234,21 +250,21 @@ class TestInstalledProductVersion(unittest.TestCase):
         product_with_no_helm_charts = InstalledProductVersion(
             'sat', '0.9.9', {'component_versions': {'helm': {}}}
         )
-        self.assertEqual(product_with_no_helm_charts.helm_charts, [])
+        self.assertEqual(product_with_no_helm_charts.helm, [])
 
     def test_no_helm_charts_null(self):
         """Test a product that has None under the 'helm' key returns an empty list."""
         product_with_no_helm_charts = InstalledProductVersion(
             'sat', '0.9.9', {'component_versions': {'helm': None}}
         )
-        self.assertEqual(product_with_no_helm_charts.helm_charts, [])
+        self.assertEqual(product_with_no_helm_charts.helm, [])
 
     def test_no_helm_charts_empty_list(self):
         """Test a product that has an empty list under the 'helm' key returns an empty list."""
         product_with_no_helm_charts = InstalledProductVersion(
             'sat', '0.9.9', {'component_versions': {'helm': []}}
         )
-        self.assertEqual(product_with_no_helm_charts.helm_charts, [])
+        self.assertEqual(product_with_no_helm_charts.helm, [])
 
     def test_s3_artifacts(self):
         """Test getting the s3 artifacts."""
