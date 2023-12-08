@@ -23,6 +23,13 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+"""
+This script splits the data in ConfigMap `cray-product-catalog` into multiple smaller
+ConfigMaps with each product's `component_versions` data in its own product ConfigMap.
+If the split is not succesful then it rollbacks to its initial state where ConfigMap
+`cray-product-catalog` will contain complete data which includes `component-versions`
+"""
+
 import logging
 
 from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL
@@ -56,12 +63,12 @@ def main():
         if response:
             if not response.metadata.resource_version:
                 LOGGER.error("Error reading resourceVersion, exiting migration process...")
-            else:
-                init_resource_version = response.metadata.resource_version
+                raise SystemExit(1)
+            init_resource_version = response.metadata.resource_version
             if not response.data:
                 LOGGER.error("Error reading ConfigMap data, exiting migration process...")
-            else:
-                config_map_data = response.data
+                raise SystemExit(1)
+            config_map_data = response.data
         else:
             LOGGER.error("Error reading ConfigMap, exiting migration process...")
             raise SystemExit(1)

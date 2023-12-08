@@ -270,6 +270,7 @@ def update_config_map(data: dict, name, namespace):
 
     if attempt == retries:
         LOGGER.error("Exceeded number of attempts; Not updating ConfigMap %s/%s.", namespace, name)
+        raise SystemExit(1)
 
 
 def main():

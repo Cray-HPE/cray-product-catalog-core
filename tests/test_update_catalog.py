@@ -93,15 +93,16 @@ class TestCatalogUpdate(unittest.TestCase):
             'cray_product_catalog.catalog_update.client.CoreV1Api.read_namespaced_config_map'
             ).start().side_effect = ApiException()
 
-        with self.assertLogs() as captured:
+        with self.assertRaises(SystemExit) as captured:
             with mock.patch(
                     'cray_product_catalog.catalog_update.random.randint', return_value=0
             ):
                 # call method under test
                 update_config_map(UPDATE_DATA, name, namespace)
                 # Verify the exact log message
-                self.assertEqual(captured.records[-1].getMessage(),
-                                 f"Exceeded number of attempts; Not updating ConfigMap {namespace}/{name}.")
+                self.assertTrue(
+                    f"Exceeded number of attempts; Not updating ConfigMap {namespace}/{name}."
+                    in captured.exception)
 
     def test_update_config_map(self):
         """

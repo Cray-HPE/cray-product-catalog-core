@@ -71,7 +71,6 @@ class ApiException(kubernetes.client.rest.ApiException):
     """
     def __init__(self):
         super().__init__()
-        super().__init__()
         self.status = ERR_NOT_FOUND
 
 

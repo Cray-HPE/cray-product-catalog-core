@@ -31,7 +31,7 @@ from typing import List
 from re import fullmatch
 
 
-from cray_product_catalog.migration import CONFIG_MAP_TEMP, CRAY_DATA_CATALOG_LABEL, \
+from cray_product_catalog.migration import CRAY_DATA_CATALOG_LABEL, \
     PRODUCT_CONFIG_MAP_PATTERN
 from cray_product_catalog.migration import PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE
 from cray_product_catalog.migration.kube_apis import KubernetesApi
@@ -75,8 +75,8 @@ class ExitHandler:
 
     def rollback(self):
         """Method to handle roll back
-        1. Deleting temporary ConfigMap
-        2. Deleting all created product ConfigMaps
+        Deleting temporary ConfigMap and all created product ConfigMaps
+        whose names are determined using the pattern PRODUCT_CONFIG_MAP_PATTERN
         """
         LOGGER.warning("Initiating rollback")
         product_config_maps = self.__get_all_created_product_config_maps()  # collecting product ConfigMaps

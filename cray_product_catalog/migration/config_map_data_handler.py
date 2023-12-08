@@ -23,8 +23,10 @@
 #
 
 """
-This script splits the data in ConfigMap `cray-product-catalog` into multiple smaller
-ConfigMaps with each product's `component_versions` data in its own product ConfigMap
+File contains functions to
+Split data in `cray-product-catalog` ConfigMap
+Create temporary and product ConfigMaps
+Rename ConfigMap
 """
 
 import logging
