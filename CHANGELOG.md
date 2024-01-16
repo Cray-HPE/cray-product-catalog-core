@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.10.1] - 2024-01-03
+## [2.0.0] - 2024-01-16
 
 ### Changed
 
@@ -461,9 +461,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.1...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.0...HEAD
 
-[1.10.1]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.0...v1.10.1
+[2.0.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.0...v2.0.0
 
 [1.10.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.9.0...v1.10.0
 
