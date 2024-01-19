@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Dependencies
-- Bump `tj-actions/changed-files` from 40 to 41 ([#307](https://github.com/Cray-HPE/cray-product-catalog/pull/307))
+- Bump `tj-actions/changed-files` from 40 to 42 ([#307](https://github.com/Cray-HPE/cray-product-catalog/pull/307), [#309](https://github.com/Cray-HPE/cray-product-catalog/pull/309))
 
 ## [1.10.0] - 2023-11-29
 
