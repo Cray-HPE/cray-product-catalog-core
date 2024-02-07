@@ -25,10 +25,10 @@ File defines few constants
 
 import os
 import re
-from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR, PRODUCT_CATALOG_CONFIG_MAP_NAME
 
 # ConfigMap name for temporary main ConfigMap
-CONFIG_MAP_TEMP = "cray-product-catalog-temp"
+CONFIG_MAP_TEMP = f"{PRODUCT_CATALOG_CONFIG_MAP_NAME}-temp"
 
 # namespace for ConfigMaps
 PRODUCT_CATALOG_CONFIG_MAP_NAME = os.environ.get("CONFIG_MAP_NAME", "cray-product-catalog").strip()
@@ -41,6 +41,4 @@ CRAY_DATA_CATALOG_LABEL = PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
 PRODUCT_CONFIG_MAP_PATTERN = re.compile('^(cray-product-catalog)-([a-z0-9.-]+)$')
 RESOURCE_VERSION = 'resource_version'
 
-retry_count = 10
-role_name = 'cray-product-catalog'
-action = 'update'
+RETRY_COUNT = 10

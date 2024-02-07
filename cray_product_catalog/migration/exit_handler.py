@@ -56,14 +56,6 @@ class ExitHandler:
     def __init__(self):
         self.k8api = KubernetesApi()  # Kubernetes API object
 
-    @staticmethod
-    def graceful_exit() -> None:
-        LOGGER.info("Migration not possible, no exception occurred.")
-
-    @staticmethod
-    def exception_exit() -> None:
-        LOGGER.error("Migration not possible, exception occurred.")
-
     def __get_all_created_product_config_maps(self) -> List:
         """Get all created product ConfigMaps"""
         cm_name = filter(_is_product_config_map,

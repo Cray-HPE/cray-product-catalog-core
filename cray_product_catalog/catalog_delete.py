@@ -136,16 +136,16 @@ class ModifyConfigMapUtil:
         return self.__max_retries_for_main_cm
 
     @max_retries_for_main_cm.setter
-    def max_retries_for_main_cm(self, __max_reties_for_main_cm):
-        self.__max_retries_for_main_cm = __max_reties_for_main_cm
+    def max_retries_for_main_cm(self, __max_retries_for_main_cm):
+        self.__max_retries_for_main_cm = __max_retries_for_main_cm
 
     @property
     def max_retries_for_prod_cm(self):
         return self.__max_retries_for_prod_cm
 
     @max_retries_for_prod_cm.setter
-    def max_retries_for_prod_cm(self, __max_reties_for_prod_cm):
-        self.__max_retries_for_prod_cm = __max_reties_for_prod_cm
+    def max_retries_for_prod_cm(self, __max_retries_for_prod_cm):
+        self.__max_retries_for_prod_cm = __max_retries_for_prod_cm
 
     @property
     def key(self):
@@ -196,12 +196,12 @@ class ModifyConfigMapUtil:
         Method to initiate modification of ConfigMaps.
         Before executing this method make sure to set these properties of the class:
         *    main_cm # Name of main ConfigMap
-        *    product_cm # name of product-specific CofigMap
+        *    product_cm # name of product-specific ConfigMap
         *    cm_namespace  # Namespace containing all ConfigMaps
         *    product_name  # Product name
         *    product_version  # Product version
-        *    max_reties_for_main_cm  # Max failure retries for main ConfigMap
-        *    max_reties_for_prod_cm  # Max failure retries for product ConfigMap
+        *    max_retries_for_main_cm  # Max failure retries for main ConfigMap
+        *    max_retries_for_prod_cm  # Max failure retries for product ConfigMap
         *    key  # Key to delete; if you want to execute complete product or a particular version, ignore it
         *    main_cm_fields  # Fields present in main ConfigMap
         *    product_cm_fields  # Fields present in product-specific ConfigMap

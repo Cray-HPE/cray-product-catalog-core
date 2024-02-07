@@ -110,16 +110,39 @@ class ProductCatalog:
             ) from err
 
         if len(configmaps) == 0:
-            raise ProductCatalogError(
-                f'No ConfigMaps found in {namespace} namespace.'
+            LOGGER.info(
+                'No ConfigMaps found in namespace %s with label %s."',
+                namespace, PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
             )
-
-        try:
-            self.products = load_config_map_data(self.name, configmaps)
-        except YAMLError as err:
-            raise ProductCatalogError(
-                f'Failed to load ConfigMap data: {err}'
-            ) from err
+            LOGGER.info('Getting data from ConfigMap %s/%s without label %s',
+                        namespace, name, PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR)
+            try:
+                config_map = self.k8s_client.read_namespaced_config_map(name, namespace)
+            except MaxRetryError as err:
+                raise ProductCatalogError(
+                    f'Unable to connect to Kubernetes to read {namespace}/{name} ConfigMap: {err}'
+                ) from err
+            except ApiException as err:
+                raise ProductCatalogError(
+                    f'Error reading {namespace}/{name} ConfigMap: {err.reason}'
+                ) from err
+            if config_map.data is None:
+                raise ProductCatalogError(
+                    f'No data found in {namespace}/{name} ConfigMap.'
+                )
+            try:
+                self.products = load_cm_data(config_map)
+            except YAMLError as err:
+                raise ProductCatalogError(
+                    f'Failed to load ConfigMap data: {err}'
+                ) from err
+        else:
+            try:
+                self.products = load_config_map_data(self.name, configmaps)
+            except YAMLError as err:
+                raise ProductCatalogError(
+                    f'Failed to load ConfigMap data: {err}'
+                ) from err
 
         invalid_products = [
             str(p) for p in self.products if not p.is_valid
@@ -174,10 +197,26 @@ class ProductCatalog:
         return matching_products[0]
 
 
+def load_cm_data(config_map):
+    """Parse read_namespaced_config_map output and get array of InstalledProductVersion objects.
+
+    Args:
+        config_map (V1ConfigMap): ConfigMap object
+
+    Returns:
+        An array of InstalledProductVersion objects.
+    """
+    return [
+        InstalledProductVersion(product_name, product_version, product_version_data)
+        for product_name, product_versions in config_map.data.items()
+        for product_version, product_version_data in safe_load(product_versions).items()
+    ]
+
 def load_config_map_data(name, configmaps):
     """Parse list_namespaced_config_map output and get array of InstalledProductVersion objects.
 
     Args:
+        name: Main ConfigMap name with which all product ConfigMaps name starts
         configmaps (V1ConfigMapList): list of ConfigMap objects.
 
     Returns:
@@ -244,7 +283,7 @@ class InstalledProductVersion:
                 for component in self.component_data.get(COMPONENT_DOCKER_KEY) or []]
 
     @property
-    def helm(self):
+    def helm_charts(self):
         """Get Helm charts associated with this InstalledProductVersion.
 
         Returns:

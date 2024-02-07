@@ -31,7 +31,7 @@ migration:
     tag: 0.0.0-docker
   configMap: cray-product-catalog
   configMapNamespace: services
-  serviceAccount: cray-product-catalog
+  serviceAccountName: cray-product-catalog
 
 global:
   appVersion: 0.0.0-docker

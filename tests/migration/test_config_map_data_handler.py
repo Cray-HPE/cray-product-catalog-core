@@ -394,7 +394,7 @@ class TestConfigMapDataHandler(unittest.TestCase):
                         f"Failed to delete ConfigMap {CONFIG_MAP_TEMP}, retrying..")
             self.assertEqual(
                         captured.records[-1].getMessage(),
-                        "Renaming ConfigMap successful")
+                        f"Failed to delete ConfigMap {CONFIG_MAP_TEMP}, but migration is successful")
 
     def test_main_for_successful_migration(self):
         """Validating that migration is successful"""

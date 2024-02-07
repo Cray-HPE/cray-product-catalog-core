@@ -30,10 +30,9 @@ Rename ConfigMap
 """
 
 import logging
+
 import yaml
 
-
-from cray_product_catalog.logging import configure_logging
 from cray_product_catalog.util.catalog_data_helper import split_catalog_data, format_product_cm_name
 from cray_product_catalog.migration.kube_apis import KubernetesApi
 from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL
@@ -49,8 +48,6 @@ class ConfigMapDataHandler:
 
     def __init__(self) -> None:
         self.k8s_obj = KubernetesApi()
-        self.config_map_data_replica = {}
-        configure_logging()
 
     def create_product_config_maps(self, product_config_map_data_list):
         """Create new product ConfigMap for each product in product_config_map_data_list
@@ -62,6 +59,10 @@ class ConfigMapDataHandler:
             product_name = list(product_data.keys())[0]
             LOGGER.debug("Creating ConfigMap for product %s", product_name)
             prod_cm_name = format_product_cm_name(PRODUCT_CATALOG_CONFIG_MAP_NAME, product_name)
+            if prod_cm_name == '':
+                LOGGER.error("Failed to create ConfigMap %s/%s because the provided product name is invalid: '%s'",
+                             PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE, prod_cm_name, product_name)
+                return False
 
             if not self.k8s_obj.create_config_map(prod_cm_name, PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE, product_data,
                                                   PRODUCT_CATALOG_CONFIG_MAP_LABEL):
@@ -98,8 +99,6 @@ class ConfigMapDataHandler:
             "Migrating data in ConfigMap=%s in namespace=%s to multiple ConfigMaps",
             PRODUCT_CATALOG_CONFIG_MAP_NAME, PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE
         )
-        # Backed up ConfigMap Data
-        self.config_map_data_replica = config_map_data
         # Get list of products
         products_list = list(config_map_data.keys())
         product_config_map_data_list = []
@@ -121,8 +120,9 @@ class ConfigMapDataHandler:
                     main_versions_data[version_data] = main_cm_data
             # If `component_versions` data exists for a product, create new product ConfigMap
             if product_versions_data:
-                product_config_map_data[product] = yaml.safe_dump(product_versions_data, default_flow_style=False)
-                # create_product_config_map(k8s_obj, product, product_config_map_data)
+                product_config_map_data= {
+                    product: yaml.safe_dump(product_versions_data, default_flow_style=False)
+                }
                 product_config_map_data_list.append(product_config_map_data)
             # Data with key other than `component_versions` should be updated to config_map_data,
             # so that new main ConfigMap will not have data with key `component_versions`
@@ -143,7 +143,6 @@ class ConfigMapDataHandler:
 
         if not self.k8s_obj.delete_config_map(rename_to, namespace):
             LOGGER.error("Failed to delete ConfigMap %s", rename_to)
-
             return False
         attempt = 0
         del_failed = False
@@ -164,16 +163,19 @@ class ConfigMapDataHandler:
                 del_failed = True
                 break
             LOGGER.error("Failed to create ConfigMap %s, retrying..", rename_to)
-            continue
         # Since only delete of backed up ConfigMap failed, retrying only delete operation
         attempt = 0
         if del_failed:
             while attempt < 10:
                 attempt += 1
                 if self.k8s_obj.delete_config_map(rename_from, namespace):
+                    del_failed = False
                     break
                 LOGGER.error("Failed to delete ConfigMap %s, retrying..", rename_from)
             # Returning success as migration is successful only backed up ConfigMap is not deleted.
-            LOGGER.info("Renaming ConfigMap successful")
+            if del_failed:
+                LOGGER.info("Failed to delete ConfigMap %s, but migration is successful", rename_from)
+            else:
+                LOGGER.info("Renaming ConfigMap successful")
             return True
         return False

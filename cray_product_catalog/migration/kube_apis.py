@@ -36,7 +36,7 @@ from urllib3.util.retry import Retry
 from urllib3.exceptions import MaxRetryError
 from cray_product_catalog.logging import configure_logging
 from cray_product_catalog.util.k8s import load_k8s
-from . import retry_count
+from . import RETRY_COUNT
 
 
 class KubernetesApi:
@@ -47,7 +47,7 @@ class KubernetesApi:
         load_k8s()
 
         retry = Retry(
-            total=retry_count, read=retry_count, connect=retry_count, backoff_factor=0.3,
+            total=RETRY_COUNT, read=RETRY_COUNT, connect=RETRY_COUNT, backoff_factor=0.3,
             status_forcelist=(500, 502, 503, 504)
         )
         self.kclient = ApiClient()
@@ -81,10 +81,6 @@ class KubernetesApi:
             # The full string representation of ApiException is very long, so just log err.reason.
             self.logger.exception('ApiException: %s', err.reason)
             return False
-        self.logger.error('Unknown error creating ConfigMap')
-        return False
-        self.logger.error('Unknown error creating ConfigMap')
-        return False
 
     def list_config_map(self, namespace, label):
         """ Reads all the ConfigMaps with certain label in particular namespace
@@ -105,10 +101,6 @@ class KubernetesApi:
             # The full string representation of ApiException is very long, so just log err.reason.
             self.logger.exception('ApiException: %s', err.reason)
             return None
-        self.logger.error('Unknown error listing ConfigMaps')
-        return None
-        self.logger.error('Unknown error listing ConfigMaps')
-        return None
 
     def list_config_map_names(self, namespace, label):
         """ Reads all the ConfigMaps with certain label in particular namespace
@@ -152,10 +144,6 @@ class KubernetesApi:
             # The full string representation of ApiException is very long, so just log err.reason.
             self.logger.exception('ApiException: %s', err.reason)
             return None
-        self.logger.error('Unknown error reading ConfigMap')
-        return None
-        self.logger.error('Unknown error reading ConfigMap')
-        return None
 
     def delete_config_map(self, name, namespace):
         """Delete the ConfigMap
@@ -173,5 +161,3 @@ class KubernetesApi:
             # The full string representation of ApiException is very long, so just log err.reason.
             self.logger.exception('ApiException: %s', err.reason)
             return False
-        self.logger.error('Unknown error deleting ConfigMap')
-        return False

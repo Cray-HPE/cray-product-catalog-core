@@ -51,11 +51,11 @@ def main():
     exit_handler = ExitHandler()
     attempt = 0
     max_attempts = 2
+    migration_failed = False
 
-    while (attempt < max_attempts):
+    while attempt < max_attempts:
         attempt += 1
         migration_failed = False
-        init_resource_version = ''
         curr_resource_version = ''
         response = config_map_obj.k8s_obj.read_config_map(
             PRODUCT_CATALOG_CONFIG_MAP_NAME, PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE

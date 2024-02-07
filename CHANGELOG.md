@@ -14,10 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CASM-4350: To address the 1MiB size limit of Kubernetes ConfigMaps, the 
   `cray-product-catalog` Kubernetes ConfigMap is split into multiple smaller
   ConfigMaps with each product's `component_versions` data in its own ConfigMap.
-  Modify the `catalog_update.py` script to update data across these ConfigMaps.
-- CASM-4427: Implement a prototype to have granular query from main and sub ConfigMaps
-- CASM-4368: Delete Cray Product Catalog details from main and sub ConfigMaps for a particular
-  product version.
+  Modified `create`, `modify`, `delete` and `query` feature to support
+  the split of single ConfigMap into multiple ConfigMaps.
 - Added new argument `max_attempts` to `modify_config_map` function in
   [`catalog_delete.py`](cray_product_catalog/catalog_delete.py), because we need not retry 100
   times when read ConfigMap fails for a product ConfigMap.

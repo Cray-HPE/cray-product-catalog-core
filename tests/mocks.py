@@ -30,6 +30,7 @@ from yaml import safe_dump
 
 from cray_product_catalog.query import InstalledProductVersion
 
+MOCK_NAMESPACE = 'mock-namespace'
 # Two versions of a product named SAT where:
 # - The two versions have have no docker images in common with one another.
 # - Both have configurations, but neither have images or recipes
