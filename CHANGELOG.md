@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2024-02-08
+
+### Changed
+
+- CASM-4350: To address the 1MiB size limit of Kubernetes ConfigMaps, the 
+  `cray-product-catalog` Kubernetes ConfigMap is split into multiple smaller
+  ConfigMaps with each product's `component_versions` data in its own ConfigMap.
+  Modified `create`, `modify`, `delete` and `query` feature to support
+  the split of single ConfigMap into multiple ConfigMaps.
+- Added new argument `max_attempts` to `modify_config_map` function in
+  [`catalog_delete.py`](cray_product_catalog/catalog_delete.py), because we need not retry 100
+  times when read ConfigMap fails for a product ConfigMap.
+- CASM-4504: Added label "type=cray-product-catalog" to all cray-product-catalog related ConfigMaps
+- Implemented migration of cray-product-catalog ConfigMap to multiple ConfigMaps as part of pre-upgrade steps
+- Added migration job to the configmap-hook
+
+### Dependencies
+- Bump `tj-actions/changed-files` from 40 to 42 ([#307](https://github.com/Cray-HPE/cray-product-catalog/pull/307), [#309](https://github.com/Cray-HPE/cray-product-catalog/pull/309))
+
 ## [1.10.0] - 2023-11-29
 
 ### Dependencies
@@ -440,7 +459,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.0...HEAD
+
+[2.0.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.0...v2.0.0
 
 [1.10.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.9.0...v1.10.0
 

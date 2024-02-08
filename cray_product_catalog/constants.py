@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -33,3 +33,9 @@ COMPONENT_DOCKER_KEY = 'docker'
 COMPONENT_HELM = 'helm'
 COMPONENT_S3 = 's3'
 COMPONENT_MANIFESTS = 'manifests'
+CONFIG_MAP_FIELDS = {'configuration', 'images', 'recipes'}
+PRODUCT_CM_FIELDS = {'component_versions'}
+PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY = 'type'
+PRODUCT_CATALOG_CONFIG_MAP_LABEL = {PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY: PRODUCT_CATALOG_CONFIG_MAP_NAME}
+PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR = f"{PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY}={PRODUCT_CATALOG_CONFIG_MAP_NAME}"
+PRODUCT_CATALOG_CONFIG_MAP_REPLICA = 'cray-product-catalog-temp'
