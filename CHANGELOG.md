@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- Regress `kubernetes` from 26.1.0 to 22.6.0 to match CSM 1.6 Kubernetes version
+
 ## [2.0.0] - 2024-02-08
 
 ### Changed
