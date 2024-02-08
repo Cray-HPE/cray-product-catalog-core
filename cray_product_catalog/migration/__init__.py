@@ -1,7 +1,6 @@
-#
 # MIT License
 #
-# (C) Copyright 2021-2024 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2023-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,18 +19,26 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-#
-kubectl:
-  image:
-    repository: artifactory.algol60.net/csm-docker/stable/docker-kubectl
-    tag: 1.19.15
-migration:
-  image:
-    repository: artifactory.algol60.net/csm-docker/S-T-A-B-L-E/cray-product-catalog-update
-    tag: 0.0.0-docker
-  configMap: cray-product-catalog
-  configMapNamespace: services
-  serviceAccountName: cray-product-catalog
+"""
+File defines few constants
+"""
 
-global:
-  appVersion: 0.0.0-docker
+import os
+import re
+from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR, PRODUCT_CATALOG_CONFIG_MAP_NAME
+
+# ConfigMap name for temporary main ConfigMap
+CONFIG_MAP_TEMP = f"{PRODUCT_CATALOG_CONFIG_MAP_NAME}-temp"
+
+# namespace for ConfigMaps
+PRODUCT_CATALOG_CONFIG_MAP_NAME = os.environ.get("CONFIG_MAP_NAME", "cray-product-catalog").strip()
+PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE = os.environ.get("CONFIG_MAP_NAMESPACE", "services").strip()
+
+# ConfigMap names
+CRAY_DATA_CATALOG_LABEL = PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+
+# product ConfigMap pattern
+PRODUCT_CONFIG_MAP_PATTERN = re.compile('^(cray-product-catalog)-([a-z0-9.-]+)$')
+RESOURCE_VERSION = 'resource_version'
+
+RETRY_COUNT = 10
