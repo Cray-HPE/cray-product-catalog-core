@@ -77,7 +77,6 @@ spec:
               yq eval 'del(.metadata.resourceVersion, .metadata.uid, .metadata.annotations, .metadata.creationTimestamp, .metadata.selfLink, .metadata.managedFields)' - |
               kubectl create -f -"
 
-
 ---
 apiVersion: batch/v1
 kind: Job
