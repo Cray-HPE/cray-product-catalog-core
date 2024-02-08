@@ -127,7 +127,9 @@ class TestProductCatalog(unittest.TestCase):
         self.mock_load_cm_data.return_value = MOCK_PRODUCTS
         with self.assertLogs(level=logging.DEBUG) as logs:
             product_catalog = self.create_and_assert_product_catalog()
-            self.mock_k8s_api.read_namespaced_config_map.assert_called_once_with(PRODUCT_CATALOG_CONFIG_MAP_NAME, MOCK_NAMESPACE)
+            self.mock_k8s_api.read_namespaced_config_map.assert_called_once_with(
+                PRODUCT_CATALOG_CONFIG_MAP_NAME, MOCK_NAMESPACE
+            )
             self.assertEqual(product_catalog.products, MOCK_PRODUCTS)
 
     def test_create_product_catalog_invalid_product_data1(self):

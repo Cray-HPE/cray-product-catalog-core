@@ -120,7 +120,7 @@ class ConfigMapDataHandler:
                     main_versions_data[version_data] = main_cm_data
             # If `component_versions` data exists for a product, create new product ConfigMap
             if product_versions_data:
-                product_config_map_data= {
+                product_config_map_data = {
                     product: yaml.safe_dump(product_versions_data, default_flow_style=False)
                 }
                 product_config_map_data_list.append(product_config_map_data)

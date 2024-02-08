@@ -212,6 +212,7 @@ def load_cm_data(config_map):
         for product_version, product_version_data in safe_load(product_versions).items()
     ]
 
+
 def load_config_map_data(name, configmaps):
     """Parse list_namespaced_config_map output and get array of InstalledProductVersion objects.
 
