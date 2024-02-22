@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2024-02-22
+
 ### Dependencies
 - Regress `kubernetes` from 26.1.0 to 22.6.0 to match CSM 1.6 Kubernetes version
 
@@ -462,7 +464,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.1...HEAD
+
+[2.0.1]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.0...v2.0.1
 
 [2.0.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.10.0...v2.0.0
 
