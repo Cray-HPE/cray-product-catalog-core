@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2024-03-20
+
+### Changed
+- CASMTRIAGE-6794: Improved logging in [`catalog_update.py`](cray_product_catalog/catalog_update.py),
+  including changing logging which caused IUF to incorrectly think the catalog update failed.
+
+### Dependencies
+- Bump `cachetools` from 5.3.2 to 5.3.3 ([#315](https://github.com/Cray-HPE/cray-product-catalog/pull/315))
+- Bump `tj-actions/changed-files` from 42 to 43 ([#316](https://github.com/Cray-HPE/cray-product-catalog/pull/316))
+
 ## [2.0.1] - 2024-02-22
 
 ### Dependencies
@@ -464,7 +474,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.1.0...HEAD
+
+[2.1.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.1...v2.1.0
 
 [2.0.1]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.0.0...v2.0.1
 
