@@ -78,8 +78,8 @@ class TestCatalogUpdate(unittest.TestCase):
             except ApiException:
                 pass
             self.assertEqual(len(captured.records), 1)  # check that there is only one log message
-            self.assertEqual(captured.records[0].getMessage(),
-                             "Error calling create_namespaced_config_map")  # Verify the exact log message
+            expected_log = f"Error calling create_namespaced_config_map on ConfigMap {namespace}/{name}"
+            self.assertEqual(captured.records[0].getMessage(), expected_log)  # Verify the exact log message
 
     def test_update_config_map_max_retries(self):
         """

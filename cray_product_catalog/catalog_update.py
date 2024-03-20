@@ -138,18 +138,15 @@ def active_field_exists(product_data):
 
 
 def create_config_map(api_instance, name, namespace):
-    """Create new product ConfigMap."""
+    """Create new product ConfigMap. Raise an Exception on failure."""
+    new_cm = V1ConfigMap()
+    new_cm.metadata = V1ObjectMeta(name=name, labels=PRODUCT_CATALOG_CONFIG_MAP_LABEL)
     try:
-        new_cm = V1ConfigMap()
-        new_cm.metadata = V1ObjectMeta(name=name, labels=PRODUCT_CATALOG_CONFIG_MAP_LABEL)
-        api_instance.create_namespaced_config_map(
-            namespace=namespace, body=new_cm
-        )
-        LOGGER.info("Created product ConfigMap %s/%s", namespace, name)
-        return True
+        api_instance.create_namespaced_config_map(namespace=namespace, body=new_cm)
     except ApiException:
-        LOGGER.exception("Error calling create_namespaced_config_map")
-        return False
+        LOGGER.error("Error calling create_namespaced_config_map on ConfigMap %s/%s", namespace, name)
+        raise
+    LOGGER.info("Created product ConfigMap %s/%s", namespace, name)
 
 
 def update_config_map(data: dict, name, namespace):
@@ -187,19 +184,22 @@ def update_config_map(data: dict, name, namespace):
         try:
             response = api_instance.read_namespaced_config_map(name, namespace)
         except ApiException as err:
-            LOGGER.exception("Error calling read_namespaced_config_map")
+            LOGGER.info("Unable to read ConfigMap %s/%s", namespace, name)
+
+            if err.status != ERR_NOT_FOUND:
+                LOGGER.error("Unexpected error in read_namespaced_config_map "
+                             "on ConfigMap %s/%s", namespace, name)
+                raise   # unrecoverable
 
             # ConfigMap doesn't exist yet
-            if err.status != ERR_NOT_FOUND:
-                raise   # unrecoverable
             if name == MAIN_CONFIG_MAP:
                 # If main ConfigMap is not found wait until it is available
                 LOGGER.warning("ConfigMap %s/%s doesn't exist, attempting again", namespace, name)
             else:
                 # If product ConfigMap is not available then create
                 LOGGER.info("Product ConfigMap %s/%s doesn't exist, attempting to create", namespace, name)
-                if not create_config_map(api_instance, name, namespace):
-                    raise   # unrecoverable
+                # The following call raises an exception on failure
+                create_config_map(api_instance, name, namespace)
             continue
 
         # Determine if ConfigMap needs to be updated
@@ -231,14 +231,17 @@ def update_config_map(data: dict, name, namespace):
                         raise SystemExit(1)
                     if SET_ACTIVE_VERSION:
                         if current_version_is_active(product_data):
-                            LOGGER.debug("ConfigMap data updates exist and desired version is active; Exiting")
+                            LOGGER.debug("ConfigMap %s/%s data updates exist and desired version is active; Exiting",
+                                         namespace, name)
                             break
                     elif REMOVE_ACTIVE_FIELD:
                         if not active_field_exists(product_data):
-                            LOGGER.debug("ConfigMap data updates exist and 'active' field has been cleared; Exiting")
+                            LOGGER.debug("ConfigMap %s/%s data updates exist and 'active' field has been cleared; "
+                                         "Exiting", namespace, name)
                             break
                     else:
-                        LOGGER.debug("ConfigMap data updates exist; Exiting")
+                        LOGGER.debug("ConfigMap %s/%s data updates exist; Exiting", namespace,
+                                     name)
                         break
 
         # Patch the ConfigMap if needed
@@ -250,7 +253,7 @@ def update_config_map(data: dict, name, namespace):
         config_map_data[PRODUCT] = yaml.safe_dump(
             product_data, default_flow_style=False
         )
-        LOGGER.debug("ConfigMap update attempt=%s", attempt)
+        LOGGER.debug("ConfigMap %s/%s update attempt=%s", namespace, name, attempt)
         try:
             new_config_map = V1ConfigMap(data=config_map_data)
             new_config_map.metadata = V1ObjectMeta(
@@ -261,12 +264,14 @@ def update_config_map(data: dict, name, namespace):
             )
         except ApiException as err:
             if err.status == ERR_CONFLICT:
-                # A conflict is raised if the resourceVersion field was unexpectedly
-                # incremented, e.g. if another process updated the ConfigMap. This
-                # provides concurrency protection.
-                LOGGER.warning("Conflict updating ConfigMap")
+                # A conflict is raised if the resourceVersion field was
+                # unexpectedly incremented, e.g. if another process updated the
+                # ConfigMap. This provides concurrency protection.
+                LOGGER.warning("Conflict updating ConfigMap %s/%s", namespace,
+                               name)
             else:
-                LOGGER.exception("Error calling replace_namespaced_config_map")
+                LOGGER.warning("Failure calling replace_namespaced_config_map on ConfigMap %s/%s",
+                               namespace, name)
 
     if attempt == retries:
         LOGGER.error("Exceeded number of attempts; Not updating ConfigMap %s/%s.", namespace, name)
