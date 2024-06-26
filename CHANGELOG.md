@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- Bump `urllib3` from 1.26.18 to 1.26.19 ([#324](https://github.com/Cray-HPE/cray-product-catalog/pull/324))
+
 ## [2.2.0] - 2024-05-29
 
 ### Changed
