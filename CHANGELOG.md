@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- CASM-4731: change to adapt cray-product-catalog to include empty dictionary objects [`config_map_data_handler.py`](cray_product_catalog/migration/config_map_data_handler.py)
+- CASM-4741: give a warning instead of raising exception if product configmap is not present [`catalog_update.py`](cray_product_catalog/catalog_delete.py)
+- CASM-4743: add check if the configmap has already been migrated before attempting to migrate [`main.py`](cray_product_catalog/migration/main.py)
+
 ### Dependencies
 - Bump `urllib3` from 1.26.18 to 1.26.19 ([#324](https://github.com/Cray-HPE/cray-product-catalog/pull/324))
 
