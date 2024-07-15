@@ -220,11 +220,10 @@ class ModifyConfigMapUtil:
 
         self.__modify_main_cm()
 
-        """Invoke __modify_product_cm function only if the product_cm is present
+        # Invoke __modify_product_cm function only if the product_cm is present
 
-        Before attempting to delete a configmap, first verify if for the product there is a product_cm present or not.
-        If not, give a warning message and continue
-        """
+        # Before attempting to delete a ConfigMap, first verify if for the product there is a product_cm present or not.
+        # If not, give a warning message and continue
         k8sclient = ApiClient()
         name = self.__product_cm
         namespace = self.__cm_namespace

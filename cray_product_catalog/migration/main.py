@@ -44,8 +44,11 @@ from cray_product_catalog.migration.exit_handler import ExitHandler
 LOGGER = logging.getLogger(__name__)
 
 
-# function to check if configmap is already migrated
 def is_migrated():
+   """
+   Check if ConfigMap is already migrated.
+   Returns True if so, False if not.
+   """
     config_map_obj = ConfigMapDataHandler()
     try:
         main_cm = config_map_obj.k8s_obj.read_config_map(
@@ -64,7 +67,7 @@ def is_migrated():
 def main():
     """Main function"""
 
-    # check if configmap has already been migrated
+    # Check if ConfigMap has already been migrated
     if is_migrated():
         LOGGER.info("Configmap %s already migrated", PRODUCT_CATALOG_CONFIG_MAP_NAME)
         return
