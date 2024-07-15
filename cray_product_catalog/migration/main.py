@@ -32,7 +32,7 @@ If the split is not succesful then it rollbacks to its initial state where Confi
 
 import logging
 
-from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL
+from cray_product_catalog.constants import PRODUCT_CATALOG_CONFIG_MAP_LABEL, PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY
 from cray_product_catalog.migration.config_map_data_handler import ConfigMapDataHandler
 from cray_product_catalog.migration import (
     PRODUCT_CATALOG_CONFIG_MAP_NAME,
@@ -44,8 +44,34 @@ from cray_product_catalog.migration.exit_handler import ExitHandler
 LOGGER = logging.getLogger(__name__)
 
 
+def is_migrated():
+    """
+    Check if ConfigMap is already migrated.
+    Returns True if so, False if not.
+    """
+    config_map_obj = ConfigMapDataHandler()
+    try:
+        main_cm = config_map_obj.k8s_obj.read_config_map(
+            PRODUCT_CATALOG_CONFIG_MAP_NAME, PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE
+        )
+    except Exception:
+        LOGGER.error("Error reading ConfigMap...")
+        return False
+    labels = main_cm.metadata.labels
+    if labels and labels.get(PRODUCT_CATALOG_CONFIG_MAP_LABEL_KEY) == PRODUCT_CATALOG_CONFIG_MAP_NAME:
+        return True
+
+    return False
+
+
 def main():
     """Main function"""
+
+    # Check if ConfigMap has already been migrated
+    if is_migrated():
+        LOGGER.info("Configmap %s already migrated", PRODUCT_CATALOG_CONFIG_MAP_NAME)
+        return
+
     LOGGER.info("Migrating %s ConfigMap data to multiple product ConfigMaps", PRODUCT_CATALOG_CONFIG_MAP_NAME)
     config_map_obj = ConfigMapDataHandler()
     exit_handler = ExitHandler()

@@ -64,7 +64,8 @@ INITIAL_MAIN_CM_DATA = {
 }
 
 MAIN_CM_DATA_EXPECTED = {
-    'HFP-firmware': '',
+    'HFP-firmware': """22.10.2: {}
+23.01.1: {}\n""",
     'analytics': """1.4.18:
   configuration:
     clone_url: https://vcs.cmn.lemondrop.hpc.amslabs.hpecorp.net/vcs/cray/analytics-config-management.git
