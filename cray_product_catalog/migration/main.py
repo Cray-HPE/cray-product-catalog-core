@@ -45,10 +45,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 def is_migrated():
-   """
-   Check if ConfigMap is already migrated.
-   Returns True if so, False if not.
-   """
+    """
+    Check if ConfigMap is already migrated.
+    Returns True if so, False if not.
+    """
     config_map_obj = ConfigMapDataHandler()
     try:
         main_cm = config_map_obj.k8s_obj.read_config_map(
