@@ -118,6 +118,9 @@ class ConfigMapDataHandler:
                 # main_cm_data is not an empty dictionary
                 if main_cm_data:
                     main_versions_data[version_data] = main_cm_data
+                # create an empty dictionary entry for the version
+                else:
+                    main_versions_data[version_data] = {}
             # If `component_versions` data exists for a product, create new product ConfigMap
             if product_versions_data:
                 product_config_map_data = {
@@ -129,7 +132,7 @@ class ConfigMapDataHandler:
             if main_versions_data:
                 config_map_data[product] = yaml.safe_dump(main_versions_data, default_flow_style=False)
             else:
-                config_map_data[product] = ''
+                config_map_data[product] = yaml.safe_dump({}, default_flow_style=False)
         return config_map_data, product_config_map_data_list
 
     def rename_config_map(self, rename_from, rename_to, namespace, label):

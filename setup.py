@@ -42,6 +42,7 @@ setup(
         'cray_product_catalog.schema': ['schema.yaml']
     },
     python_requires='>=3.9, <4',
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             'catalog_delete=cray_product_catalog.catalog_delete:main',
