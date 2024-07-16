@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2024-07-16
+
 ### Changed
 - CASM-4731: change to adapt cray-product-catalog to include empty dictionary objects [`config_map_data_handler.py`](cray_product_catalog/migration/config_map_data_handler.py)
 - CASM-4741: give a warning instead of raising exception if product configmap is not present [`catalog_update.py`](cray_product_catalog/catalog_delete.py)
@@ -492,7 +494,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.3.0...HEAD
+
+[2.3.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.2.0...v2.3.0
 
 [2.2.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.1.0...v2.2.0
 
