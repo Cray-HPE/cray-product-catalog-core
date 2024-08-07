@@ -41,6 +41,17 @@ information and metadata to the cray-product-catalog config map located in the
 services namespace via a Kubernetes job as part of a Helm chart. The image
 could also be used via podman on an NCN, but this has not been tested.
 
+NOTE: As of 2.3.0 version of cray-product-catalog, the configmap for cray-product-catalog
+has been split into multiple configmaps in the services namespace. The main configmap is
+referred to as cray-product-catalog, and the product-specific configmap names have the format
+cray-product-catalog-<product-name>.
+
+The main cray-product-catalog configmap has entries for each product version. The
+product-specific configmaps include detailed entries for each version of that product.
+
+The migration of the configmap format into the one described above is automatically performed
+when the Helm chart for version 2.3.0+ is deployed.
+
 ## Example Usage
 
 ### Helm Chart
