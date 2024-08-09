@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
 - CASM-4815 : Updating the README to include information on migration of cray-product-catalog configmap.
+- List installed Python packages in Dockerfile, for build logging purposes
 
 ## [2.3.0] - 2024-07-16
 
