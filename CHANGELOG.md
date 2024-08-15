@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2024-08-15
+
+### Changed
+- CASMCMS-9098: Restore `install_requires` and `long_description` to Python module by creating [`MANIFEST.in`](MANIFEST.in)
+- CASM-4815 : Updating the README to include information on migration of cray-product-catalog configmap.
+- List installed Python packages in Dockerfile, for build logging purposes
+- Pin major and minor versions of Python dependencies, but use latest patch version
+
 ## [2.3.0] - 2024-07-16
 
 ### Changed
@@ -494,7 +502,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.3.1...HEAD
+
+[2.3.1]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.3.0...v2.3.1
 
 [2.3.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v2.2.0...v2.3.0
 
