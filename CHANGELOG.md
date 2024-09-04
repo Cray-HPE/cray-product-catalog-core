@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Dependencies
-- CSM 1.6 moved to Kubernetes 1.24, so use client v24.x to ensure compatability
+- CSM 1.6 moved to Kubernetes 1.24, so use client v24.x to ensure compatibility
+- CASMCMS-9132 - updated to 'docker-kubectl' image version 1.24.17 for the Kubernetes 1.24 upgrade.
 
 ## [2.3.1] - 2024-08-15
 
