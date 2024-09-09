@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2024-09-09
+
 ### Dependencies
 - CSM 1.6 moved to Kubernetes 1.24, so use client v24.x to ensure compatibility
 - Bump `tj-actions/changed-files` from 44 to 45 ([#349](https://github.com/Cray-HPE/cray-product-catalog/pull/349))
