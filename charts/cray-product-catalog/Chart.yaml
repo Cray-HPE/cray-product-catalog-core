@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -40,5 +40,5 @@ annotations:
     - name: cray-product-catalog-update
       image: artifactory.algol60.net/csm-docker/S-T-A-B-L-E/cray-product-catalog-update:0.0.0-docker
     - name: docker-kubectl
-      image: artifactory.algol60.net/csm-docker/stable/docker-kubectl:1.19.15
+      image: artifactory.algol60.net/csm-docker/stable/docker-kubectl:1.24.17
   artifacthub.io/license: MIT
