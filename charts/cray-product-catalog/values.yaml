@@ -24,7 +24,7 @@
 kubectl:
   image:
     repository: artifactory.algol60.net/csm-docker/stable/docker-kubectl
-    tag: 1.19.15
+    tag: 1.24.17
 migration:
   image:
     repository: artifactory.algol60.net/csm-docker/S-T-A-B-L-E/cray-product-catalog-update
