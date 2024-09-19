@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -60,17 +60,17 @@ chart_test:
 		docker run --rm -v ${PWD}/${CHART_PATH}:/apps ${HELM_UNITTEST_IMAGE} -3 ${NAME}
 
 pymod_prepare:
-		pip3 install --upgrade pip setuptools wheel
+		pip3 install --upgrade --user pip setuptools wheel
 
 pymod_build:
 		python3 setup.py sdist bdist_wheel
 
 pymod_test:
-		pip3 install -r requirements.txt
-		pip3 install -r requirements-test.txt
+		pip3 install --user -r requirements.txt
+		pip3 install --user -r requirements-test.txt
 		mkdir -p pymod_test
 		python3 setup.py install --user
 		python3 -m unittest discover tests
-		pycodestyle --config=.pycodestyle cray_product_catalog tests
+		python3 -m pycodestyle --config=.pycodestyle cray_product_catalog tests
 		# Run pylint, but only fail the build if the code scores lower than 8.0
-		pylint --fail-under=8.0 --rcfile=.pylintrc cray_product_catalog tests
+		python3 -m pylint --fail-under=8.0 --rcfile=.pylintrc cray_product_catalog tests
