@@ -26,16 +26,8 @@
 # cms-meta-tools repo to ./cms_meta_tools
 
 NAME ?= cray-product-catalog
-APP_NAME ?= $(NAME)-update
-CHART_PATH ?= charts
 
-DOCKER_VERSION ?= $(shell head -1 .docker_version)
-CHART_VERSION ?= $(shell head -1 .chart_version)
-
-HELM_UNITTEST_IMAGE ?= quintush/helm-unittest:3.3.0-0.2.5
-
-all: runbuildprep lint image chart pymod
-chart: chart_setup chart_package chart_test
+all: runbuildprep lint pymod
 pymod: pymod_prepare pymod_build pymod_test
 
 runbuildprep:
@@ -43,21 +35,6 @@ runbuildprep:
 
 lint:
 		./cms_meta_tools/scripts/runLint.sh
-
-image:
-		docker build --pull ${DOCKER_ARGS} --tag '${APP_NAME}:${DOCKER_VERSION}' .
-
-chart_setup:
-		mkdir -p ${CHART_PATH}/.packaged
-		printf "\nglobal:\n  appVersion: ${DOCKER_VERSION}" >> ${CHART_PATH}/${NAME}/values.yaml
-
-chart_package:
-		helm dep up ${CHART_PATH}/${NAME}
-		helm package ${CHART_PATH}/${NAME} -d ${CHART_PATH}/.packaged --app-version ${DOCKER_VERSION} --version ${CHART_VERSION}
-
-chart_test:
-		helm lint "${CHART_PATH}/${NAME}"
-		docker run --rm -v ${PWD}/${CHART_PATH}:/apps ${HELM_UNITTEST_IMAGE} -3 ${NAME}
 
 pymod_prepare:
 		pip3 install --upgrade --user pip setuptools wheel
