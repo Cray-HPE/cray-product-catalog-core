@@ -31,9 +31,6 @@ The cray-product-catalog-update image is assumed to be running in the CSM
 Kubernetes cluster by an actor that has permissions to read and update config
 maps in the namespace that is configured.
 
-Additionally, this repository provides the `cray-product-catalog` config map,
-which is managed by the cray-product-catalog Helm chart.
-
 ## Getting Started
 
 The main use case for cray-product-catalog is for a product to add install-time
@@ -48,55 +45,6 @@ cray-product-catalog-<product-name>.
 
 The main cray-product-catalog configmap has entries for each product version. The
 product-specific configmaps include detailed entries for each version of that product.
-
-The migration of the configmap format into the one described above is automatically performed
-when the Helm chart for version 2.3.0+ is deployed.
-
-## Example Usage
-
-### Helm Chart
-
-Two seminal examples of using cray-product-catalog are the `cray-import-config`
-and `cray-import-kiwi-recipe-image` base charts. Review the values files and
-Kubernetes job template to see cray-product-catalog in action.
-
-* [cray-import-config](https://github.com/Cray-HPE/cray-product-install-charts/tree/master/charts/cray-import-config)
-* [cray-import-kiwi-recipe-image](https://github.com/Cray-HPE/cray-product-install-charts/tree/master/charts/cray-import-kiwi-recipe-image)
-
-### Podman on NCN
-
-To create an entry in the config map for an "example" product with version
-1.2.3, you can use podman on a Kubernetes worker/master node. Be sure to mount
-the Kubernetes config file into the running container as well as the
-`YAML_CONTENT_FILE`.
-
-```bash
-ncn-w001:~/ # podman run --rm --name example-cpc --network podman-cni-config \
-    -e PRODUCT=example \
-    -e PRODUCT_VERSION=1.2.3 \
-    -e YAML_CONTENT_FILE=/results/example.yaml \
-    -e KUBECONFIG=/.kube/admin.conf \
-    -v /etc/kubernetes:/.kube:ro \
-    -v ${PWD}:/results:ro \
-    artifactory.algol60.net/csm-docker/stable/cray-product-catalog-update:1.2.57
-Updating config_map=cray-product-catalog in namespace=services for product/version=example/1.2.3
-Retrieving content from /results/example.yaml
-Resting 3s before reading ConfigMap
-Product=example does not exist; will update
-ConfigMap update attempt=1
-Resting 2s before reading ConfigMap
-ConfigMap data updates exist; Exiting.
-```
-
-View the results in a nice format:
-
-```bash
-ncn-w001:~/ # kubectl get cm -n services cray-product-catalog -o json | jq .data.example | ./yq r -
-1.2.3:
-  this:
-    is: some
-    yaml: stuff
-```
 
 ## Configuration
 
@@ -164,12 +112,6 @@ output is governed by the `GitVersion.yml` file in the root of this repo.
 Run `gitversion -output json` to see the current version based on the checked
 out commit.
 
-Create a release by triggering the [Draft New Release](https://github.com/Cray-HPE/cray-product-catalog/actions/workflows/draft-new-release.yml)
-workflow with the version that will be released.
-
-Releases are automatically published when pull requests to the master branch
-are merged.
-
 ## Contributing
 
 This repo uses [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)
@@ -179,11 +121,8 @@ CMS-core-product-support team members should make a branch. Others, make a fork.
 
 ## Built With
 
-* Alpine Linux
 * Python 3
-* Python Requests
 * Kubernetes Python Client
-* Docker
 * [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/)
 * [Gitversion](https://gitversion.net)
 * Good intentions
@@ -194,6 +133,6 @@ See the [CHANGELOG](CHANGELOG.md) for changes. This file uses the [Keep A Change
 format.
 
 ## Copyright and License
+
 This project is copyrighted by Hewlett Packard Enterprise Development LP and is under the MIT
 license. See the [LICENSE](LICENSE) file for details.
-
