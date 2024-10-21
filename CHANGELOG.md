@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2024-10-21
+
 ### Changed
 
 - CASMTRIAGE-7413: Split this repository off from the `cray-product-catalog` repository, to separate
