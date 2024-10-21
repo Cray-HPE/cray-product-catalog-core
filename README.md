@@ -1,8 +1,8 @@
 # Cray Product Catalog
 
-This repository contains the Docker image definition for the cray-product-catalog-update
-image. This image provides a script that uploads the contents of a yaml file to
-a product catalog entry, which serves as a kubernetes config map.
+This repository contains the Python source code and YAML schema files for the Cray
+Product Catalog. The associated Docker image and Helm chart are created from the
+[`cray-product-catalog`](https://github.com/Cray-HPE/cray-product-catalog) repository.
 
 See the [CSM Compatibility Matrix](https://github.com/Cray-HPE/cray-product-catalog/wiki/CSM-Compatibility-Matrix)
 for more information about what version of the Cray Product Catalog Update image to

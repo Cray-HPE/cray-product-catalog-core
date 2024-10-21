@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- CASMTRIAGE-7413: Split this repository off from the `cray-product-catalog` repository, to separate
+  the product catalog source code from the Docker image and Helm chart. The original repository will
+  be used to build and publish those. This repository contains the product catalog source code and schemas.
+
+> Versions below this point were published from the cray-product-catalog repository, before that
+> repository was split into two. The commit history was copied into this repository, but the tags
+> will not exist here.
+
 ## [2.4.1] - 2024-09-19
 
 ### Changed
