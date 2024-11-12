@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0] - 2024-11-12
+
+### Added
+
+- CASMCMS-9199: Added support for Python 3.6
+
 ## [2.5.0] - 2024-10-21
 
 ### Changed
@@ -526,6 +532,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Change default reviewers to CMS-core-product-support
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog-core/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog-core/compare/v2.6.0...HEAD
+
+[2.6.0]: https://github.com/Cray-HPE/cray-product-catalog-core/compare/v2.5.0...v2.6.0
 
 [2.5.0]: https://github.com/Cray-HPE/cray-product-catalog-core/compare/5f4a2f8309e954807d7acc6e165308c2a0cd56ba...v2.5.0
