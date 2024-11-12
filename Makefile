@@ -49,6 +49,7 @@ pymod_test:
 		python3 --version
 		python3 -m venv --system-site-packages $(VENV_DIR)
 		$(VENV_PY) --version
+		$(VENV_PY) -m pip install --upgrade pip build setuptools wheel -c constraints.txt
 		$(VENV_PY) -m pip install -r requirements.txt
 		$(VENV_PY) -m pip install -r requirements-test.txt
 		$(VENV_PY) setup.py install
