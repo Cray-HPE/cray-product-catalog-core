@@ -50,9 +50,8 @@ pymod_test:
 		python3 -m venv --system-site-packages $(VENV_DIR)
 		$(VENV_PY) --version
 		$(VENV_PY) -m pip install --upgrade pip build setuptools wheel -c constraints.txt
-		$(VENV_PY) -m pip install -r requirements.txt
+		$(VENV_PY) -m pip install dist/cray_product_catalog*.whl -r requirements.txt
 		$(VENV_PY) -m pip install -r requirements-test.txt
-		$(VENV_PY) setup.py install
 		$(VENV_PY) -m unittest discover tests
 		$(VENV_PY) -m pycodestyle --config=.pycodestyle cray_product_catalog tests
 		# Run pylint, but only fail the build if the code scores lower than 8.0
