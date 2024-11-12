@@ -26,6 +26,9 @@
 # cms-meta-tools repo to ./cms_meta_tools
 
 NAME ?= cray-product-catalog
+PY_VERSION ?= 3.6
+VENV_DIR ?= pylint$(PY_VERSION)
+VENV_PY ?= $(VENV_DIR)/bin/python
 
 all: runbuildprep lint pymod
 pymod: pymod_prepare pymod_build pymod_test
@@ -44,11 +47,12 @@ pymod_build:
 
 pymod_test:
 		python3 --version
-		python3 -m pip install --user -r requirements.txt
-		python3 -m pip install --user -r requirements-test.txt
-		mkdir -p pymod_test
-		python3 setup.py install --user
-		python3 -m unittest discover tests
-		python3 -m pycodestyle --config=.pycodestyle cray_product_catalog tests
+		python3 -m venv --system-site-packages $(VENV_DIR)
+		$(VENV_PY) --version
+		$(VENV_PY) -m pip install -r requirements.txt
+		$(VENV_PY) -m pip install -r requirements-test.txt
+		$(VENV_PY) setup.py install
+		$(VENV_PY) -m unittest discover tests
+		$(VENV_PY) -m pycodestyle --config=.pycodestyle cray_product_catalog tests
 		# Run pylint, but only fail the build if the code scores lower than 8.0
-		python3 -m pylint --fail-under=8.0 --rcfile=.pylintrc cray_product_catalog tests
+		$(VENV_PY) -m pylint --fail-under=8.0 --rcfile=.pylintrc cray_product_catalog tests
