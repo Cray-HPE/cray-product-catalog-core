@@ -109,7 +109,7 @@ pipeline {
                         image "${pyImage}:${PY_VERSION}"
                     }
                 }
-                stages { stage('Pylint') { steps { sh "make pymod_test" } } }
+                stages { stage('Pylint') { steps { sh "make -B pymod_test" } } }
             }
         }
 
