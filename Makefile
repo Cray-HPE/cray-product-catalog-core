@@ -43,8 +43,9 @@ pymod_build:
 		python3 setup.py sdist bdist_wheel
 
 pymod_test:
-		pip3 install --user -r requirements.txt
-		pip3 install --user -r requirements-test.txt
+		python3 --version
+		python3 -m pip install --user -r requirements.txt
+		python3 -m pip install --user -r requirements-test.txt
 		mkdir -p pymod_test
 		python3 setup.py install --user
 		python3 -m unittest discover tests
