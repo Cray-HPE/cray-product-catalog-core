@@ -53,7 +53,7 @@ setup(
         'cray_product_catalog.schema': ['schema.yaml']
     },
     install_requires=install_requires,
-    python_requires='>=3.9, <4',
+    python_requires='>=3.6, <4',
     include_package_data=True,
     entry_points={
         'console_scripts': [
