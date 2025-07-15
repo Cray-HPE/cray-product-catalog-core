@@ -57,14 +57,6 @@ class ProductCatalogError(Exception):
     """An error occurred reading or manipulating product installs."""
 
 
-class LabeledProductCatalogNotFoundError(ProductCatalogError):
-    """An error occurred trying to find the product catalog ConfigMaps using a label selector.
-
-    This likely means the system is older and has not been updated to use the new
-    split and labeled ConfigMaps.
-    """
-
-
 class ProductCatalog:
     """A collection of installed product versions.
 
@@ -117,11 +109,7 @@ class ProductCatalog:
         # need to load the schema and validate it against the JSON schema meta-schema.
         self.validator = get_validator()
 
-        try:
-            config_map_data = self.get_config_map_data()
-        except LabeledProductCatalogNotFoundError:
-            config_map_data = self.get_legacy_config_map_data()
-
+        config_map_data = self.get_config_map_data()
         self.products = [
             InstalledProductVersion(product_name, product_version, product_version_data,
                                     validator=self.validator, shallow=self.shallow)
@@ -142,21 +130,20 @@ class ProductCatalog:
             p for p in self.products if p.is_valid
         ]
 
-    def get_config_map_data(self):
-        """Load product catalog data from new split ConfigMaps.
+    def get_config_maps(self):
+        """Get the ConfigMaps containing product catalog data from Kubernetes.
 
-        This finds and merges data from all ConfigMaps that have the new label
-        PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+        This finds and returns all ConfigMaps that have the new label
+        PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR. If no such ConfigMaps are found,
+        it falls back on the legacy ConfigMap with the name specified in the
+        constructor.
 
         Raises:
-            LabeledProductCatalogNotFoundError: if no ConfigMaps with the
-                expected label are found.
-            ProductCatalogError: if there is a failure to load data from the
-                ConfigMap
+            ProductCatalogError: if there is a failure to query Kubernetes for
+                the ConfigMaps or if the single ConfigMap contains no data.
 
         Returns:
-            dict: A mapping from product name to another dict mapping from
-                product versions to the data for that product version.
+            list: A list of V1ConfigMap objects that contain product catalog data.
         """
         try:
             config_maps = self.k8s_client.list_namespaced_config_map(
@@ -173,17 +160,50 @@ class ProductCatalog:
             ) from err
 
         if len(config_maps) == 0:
-            raise LabeledProductCatalogNotFoundError(
-                f'No ConfigMaps found in namespace {self.namespace} with '
-                f'label {PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR}.'
-            )
+            LOGGER.info('No ConfigMaps found with label "%s" in namespace "%s". '
+                        'Falling back on ConfigMap %s/%s',
+                        PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR,
+                        self.namespace, self.namespace, self.name)
+            try:
+                config_map = self.k8s_client.read_namespaced_config_map(self.name, self.namespace)
+            except MaxRetryError as err:
+                raise ProductCatalogError(
+                    f'Unable to connect to Kubernetes to read {self.namespace}/{self.name} ConfigMap: {err}'
+                ) from err
+            except ApiException as err:
+                raise ProductCatalogError(
+                    f'Error reading {self.namespace}/{self.name} ConfigMap: {err.reason}'
+                ) from err
+            if config_map.data is None:
+                raise ProductCatalogError(
+                    f'No data found in {self.namespace}/{self.name} ConfigMap.'
+                )
+            config_maps = [config_map]
 
+        return config_maps
+
+    def get_config_map_data(self):
+        """Load product catalog data from the cray-product-catalog ConfigMaps.
+
+        This finds and merges data from all ConfigMaps that have the new label
+        PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR or from the legacy ConfigMap with
+        the name specified in the constructor if no labeled ConfigMaps are found.
+
+        Raises:
+            ProductCatalogError: if there is a failure to load data from the
+                ConfigMap
+
+        Returns:
+            dict: A mapping from product name to another dict mapping from
+                product versions to the data for that product version.
+        """
+        config_maps = self.get_config_maps()
         config_map_data = defaultdict(dict)
         for cm in config_maps:
             cm_name = cm.metadata.name
             if self.shallow and cm_name != self.name or not cm_name.startswith(self.name):
                 # Skip if shallow and not the main config map or if the ConfigMap name
-                # does not start  with the expected prefix.
+                # does not start with the expected prefix.
                 continue
             for product_name, product_data_str in cm.data.items():
                 try:
@@ -196,54 +216,6 @@ class ProductCatalog:
                 config_map_data[product_name] = merge_dict(product_data, config_map_data[product_name])
 
         return dict(config_map_data)
-
-    def get_legacy_config_map_data(self):
-        """Load product catalog data from legacy ConfigMap.
-
-        This loads data only from a single ConfigMap, whose name was specified
-        in the constructor. It does not find ConfigMaps using a label selector.
-        This is only called when the constructor fails to find ConfigMaps using
-        the label.
-
-        Raises:
-            ProductCatalogError: if there is a failure to load data from the
-                ConfigMap
-
-        Returns:
-            dict: A mapping from product name to a another dict mapping from
-                product versions to the data for that product version.
-        """
-        try:
-            config_map = self.k8s_client.read_namespaced_config_map(self.name, self.namespace)
-        except MaxRetryError as err:
-            raise ProductCatalogError(
-                f'Unable to connect to Kubernetes to read {self.namespace}/{self.name} ConfigMap: {err}'
-            ) from err
-        except ApiException as err:
-            raise ProductCatalogError(
-                f'Error reading {self.namespace}/{self.name} ConfigMap: {err.reason}'
-            ) from err
-        if config_map.data is None:
-            raise ProductCatalogError(
-                f'No data found in {self.namespace}/{self.name} ConfigMap.'
-            )
-
-        config_map_data = {}
-
-        # The ConfigMap data is a dictionary mapping from product name to a YAML string
-        # that contains a dictionary mapping from product version to the data for that
-        # product version.
-        for product_name, product_data_str in config_map.data.items():
-            try:
-                product_data = safe_load(product_data_str)
-            except YAMLError as err:
-                raise ProductCatalogError(
-                    f'Failed to load data for product "{product_name}" from ConfigMap {self.name}: {err}'
-                ) from err
-
-            config_map_data[product_name] = product_data
-
-        return config_map_data
 
     def get_product(self, name, version=None):
         """Get the InstalledProductVersion matching the given name/version.
