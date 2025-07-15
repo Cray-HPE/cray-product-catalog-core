@@ -109,7 +109,7 @@ class ProductCatalog:
         # need to load the schema and validate it against the JSON schema meta-schema.
         self.validator = get_validator()
 
-        config_map_data = self.get_config_map_data()
+        config_map_data = self._get_config_map_data()
         self.products = [
             InstalledProductVersion(product_name, product_version, product_version_data,
                                     validator=self.validator, shallow=self.shallow)
@@ -130,7 +130,7 @@ class ProductCatalog:
             p for p in self.products if p.is_valid
         ]
 
-    def get_config_maps(self):
+    def _get_config_maps(self):
         """Get the ConfigMaps containing product catalog data from Kubernetes.
 
         This finds and returns all ConfigMaps that have the new label
@@ -182,7 +182,7 @@ class ProductCatalog:
 
         return config_maps
 
-    def get_config_map_data(self):
+    def _get_config_map_data(self):
         """Load product catalog data from the cray-product-catalog ConfigMaps.
 
         This finds and merges data from all ConfigMaps that have the new label
@@ -197,7 +197,7 @@ class ProductCatalog:
             dict: A mapping from product name to another dict mapping from
                 product versions to the data for that product version.
         """
-        config_maps = self.get_config_maps()
+        config_maps = self._get_config_maps()
         config_map_data = defaultdict(dict)
         for cm in config_maps:
             cm_name = cm.metadata.name
