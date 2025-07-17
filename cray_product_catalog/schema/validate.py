@@ -39,8 +39,9 @@ def get_validator():
         jsonschema.protocols.Validator: A validator class for the schema defined in schema.yaml
     """
     schema_data = pkgutil.get_data(__name__, 'schema.yaml')
-    validator_cls = jsonschema.validators.validator_for(schema_data)
-    return validator_cls(schema_data)
+    schema_dict = yaml.safe_load(schema_data)
+    validator_cls = jsonschema.validators.validator_for(schema_dict)
+    return validator_cls(schema_dict)
 
 
 def validate(data):

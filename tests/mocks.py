@@ -26,13 +26,17 @@ Mock data for ProductCatalog and InstalledProductVersion unit tests
 """
 
 import datetime
+from unittest.mock import Mock
 from yaml import safe_dump
+
+from kubernetes.client import V1ConfigMap, V1ConfigMapList
 
 from cray_product_catalog.query import InstalledProductVersion
 
 MOCK_NAMESPACE = 'mock-namespace'
-# Two versions of a product named SAT where:
-# - The two versions have have no docker images in common with one another.
+
+# The combined product catalog data for two versions of the SAT product where:
+# - The two versions have no docker images in common with one another.
 # - Both have configurations, but neither have images or recipes
 SAT_VERSIONS = {
     '2.0.0': {
@@ -74,8 +78,20 @@ SAT_VERSIONS = {
         }
     },
 }
+# The data for the SAT product that would appear in the main cray-product-catalog ConfigMap
+SAT_MAIN_CM_DATA = {
+    version: {
+        key: value for key, value in version_data.items() if key != 'component_versions'
+    } for version, version_data in SAT_VERSIONS.items()
+}
+# The data for the SAT product that would appear in the separate cray-product-catalog-sat ConfigMap
+SAT_SEPARATE_CM_DATA = {
+    version: {
+        'component_versions': version_data.get('component_versions', {}),
+    } for version, version_data in SAT_VERSIONS.items()
+}
 
-# Two versions of a product named COS where:
+# The combined product catalog data for two versions of the COS product where:
 # - The two versions have one docker image name and version in common
 # - The first version has docker images and manifests but not helm charts, repositories, configuration,
 #   images, or recipes
@@ -128,8 +144,21 @@ COS_VERSIONS = {
         }
     },
 }
+# The data for the COS product that would appear in the main cray-product-catalog ConfigMap
+COS_MAIN_CM_DATA = {
+    version: {
+        key: value for key, value in version_data.items() if key != 'component_versions'
+    } for version, version_data in COS_VERSIONS.items()
+}
+# The data for the COS product that would appear in the separate cray-product-catalog-cos ConfigMap
+COS_SEPARATE_CM_DATA = {
+    version: {
+        'component_versions': version_data.get('component_versions', {}),
+    } for version, version_data in COS_VERSIONS.items()
+}
 
-# One version of "cpe" product that has repositories, s3, configuration, images, and recipes
+# The combined product catalog data for one version of the CPE product that has repositories,
+# s3 artifacts, configuration, images, and recipes
 CPE_VERSION = {
     '2.0.0': {
         'component_versions': {
@@ -161,7 +190,20 @@ CPE_VERSION = {
         }
     }
 }
+# The data for the cpe product that would appear in the main cray-product-catalog ConfigMap
+CPE_MAIN_CM_DATA = {
+    version: {
+        key: value for key, value in version_data.items() if key != 'component_versions'
+    } for version, version_data in CPE_VERSION.items()
+}
+# The data for the cpe product that would appear in the separate cray-product-catalog-cpe ConfigMap
+CPE_SEPARATE_CM_DATA = {
+    version: {
+        'component_versions': version_data.get('component_versions', {}),
+    } for version, version_data in CPE_VERSION.items()
+}
 
+# The combined product catalog data for one version of the other_product that has:
 # One version of "Other Product" that also uses cray/cray-sat:1.0.1
 OTHER_PRODUCT_VERSION = {
     '2.0.0': {
@@ -175,6 +217,18 @@ OTHER_PRODUCT_VERSION = {
             ]
         }
     }
+}
+# The data for the other_product that would appear in the main cray-product-catalog ConfigMap
+OTHER_PRODUCT_MAIN_CM_DATA = {
+    version: {
+        key: value for key, value in version_data.items() if key != 'component_versions'
+    } for version, version_data in OTHER_PRODUCT_VERSION.items()
+}
+# The data for the other_product that would appear in the separate cray-product-catalog-other_product ConfigMap
+OTHER_PRODUCT_SEPARATE_CM_DATA = {
+    version: {
+        'component_versions': version_data.get('component_versions', {}),
+    } for version, version_data in OTHER_PRODUCT_VERSION.items()
 }
 
 # Multiple versions of products named 'cos', 'sat', and 'cpe' that has valid YAML but not matching schema
@@ -205,13 +259,37 @@ MOCK_INVALID_PRODUCT_DATA = {
     }
 }
 
-# A mock version of the data returned when querying the Product Catalog ConfigMap
-MOCK_PRODUCT_CATALOG_DATA = {
+# Combined product catalog ConfigMap data (pre-migration)
+MOCK_COMBINED_PRODUCT_CATALOG_DATA = {
     'sat': safe_dump(SAT_VERSIONS),
     'cos': safe_dump(COS_VERSIONS),
     'cpe': safe_dump(CPE_VERSION),
     'other_product': safe_dump(OTHER_PRODUCT_VERSION)
 }
+# Main product catalog ConfigMap data (post-migration)
+MOCK_MAIN_PRODUCT_CATALOG_DATA = {
+    'sat': safe_dump(SAT_MAIN_CM_DATA),
+    'cos': safe_dump(COS_MAIN_CM_DATA),
+    'cpe': safe_dump(CPE_MAIN_CM_DATA),
+    'other_product': safe_dump(OTHER_PRODUCT_MAIN_CM_DATA)
+}
+# A mock V1ConfigMap object for the combined product catalog ConfigMap (pre-migration)
+MOCK_COMBINED_PRODUCT_CATALOG_CONFIG_MAP = Mock(data=MOCK_COMBINED_PRODUCT_CATALOG_DATA, spec=V1ConfigMap)
+# A mock V1ConfigMap object for the main cray-product-catalog ConfigMap (post-migration)
+MOCK_MAIN_PRODUCT_CATALOG_CONFIG_MAP = Mock(data=MOCK_MAIN_PRODUCT_CATALOG_DATA, spec=V1ConfigMap)
+# A mock V1ConfigMapList object containing all the expected labeled ConfigMaps. This includes
+# both the main ConfigMap and the separate product ConfigMaps
+MOCK_LABELED_PRODUCT_CATALOG_CONFIG_MAPS = Mock(
+    items=[Mock(data=config_map_data, spec=V1ConfigMap)
+           for config_map_data in (MOCK_MAIN_PRODUCT_CATALOG_DATA,
+                                   {'sat': safe_dump(SAT_SEPARATE_CM_DATA)},
+                                   {'cos': safe_dump(COS_SEPARATE_CM_DATA)},
+                                   {'cpe': safe_dump(CPE_SEPARATE_CM_DATA)},
+                                   {'other_product': safe_dump(OTHER_PRODUCT_SEPARATE_CM_DATA)})],
+    spec=V1ConfigMapList
+)
+# A mock for the case when there are no labeled ConfigMaps (e.g. on a system prior to migration)
+MOCK_EMPTY_LABELED_PRODUCT_CATALOG_CONFIG_MAPS = Mock(items=[], spec=V1ConfigMapList)
 
 # A mock version of the data returned after loading the ConfigMap data
 MOCK_PRODUCTS = \
