@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2021-2024 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -23,9 +23,10 @@
 """
 Defines classes for querying for information about the installed products.
 """
-
+from collections import defaultdict
 import logging
 from pkg_resources import parse_version
+import warnings
 
 from jsonschema.exceptions import ValidationError
 from kubernetes.client import CoreV1Api
@@ -45,8 +46,8 @@ from cray_product_catalog.constants import (
     PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE,
     PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
 )
-from cray_product_catalog.schema.validate import validate
-from cray_product_catalog.util import load_k8s
+from cray_product_catalog.schema.validate import get_validator
+from cray_product_catalog.util import cached_property, load_k8s
 from cray_product_catalog.util.merge_dict import merge_dict
 
 LOGGER = logging.getLogger(__name__)
@@ -82,12 +83,18 @@ class ProductCatalog:
         except ConfigException as err:
             raise ProductCatalogError(f'Unable to load kubernetes configuration: {err}.') from err
 
-    def __init__(self, name=PRODUCT_CATALOG_CONFIG_MAP_NAME, namespace=PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE):
+    def __init__(self, name=PRODUCT_CATALOG_CONFIG_MAP_NAME, namespace=PRODUCT_CATALOG_CONFIG_MAP_NAMESPACE,
+                 shallow=False):
         """Create the ProductCatalog object.
 
         Args:
             name (str): The product catalog Kubernetes ConfigMap name.
             namespace (str): The product catalog Kubernetes ConfigMap namespace.
+            shallow (bool): If True, only load product catalog data from the main
+                ConfigMap, not from any of the product-specific ConfigMaps. Note
+                that any data under the component_versions key stored in the
+                product-specific ConfigMaps will not be loaded, and warnings will
+                be logged if there is an attempt to access that data.
 
         Raises:
             ProductCatalogError: if reading the ConfigMap failed.
@@ -95,54 +102,20 @@ class ProductCatalog:
         self.name = name
         self.namespace = namespace
         self.k8s_client = self._get_k8s_api()
-        try:
-            configmaps = self.k8s_client.list_namespaced_config_map(
-                namespace, label_selector=PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
-            ).items
-        except MaxRetryError as err:
-            raise ProductCatalogError(
-                f'Unable to connect to Kubernetes to read {namespace} namespace: {err}'
-            ) from err
-        except ApiException as err:
-            # The full string representation of ApiException is very long, so just log err.reason.
-            raise ProductCatalogError(
-                f'Error listing ConfigMaps in {namespace} namespace: {err.reason}'
-            ) from err
+        self.shallow = shallow
 
-        if len(configmaps) == 0:
-            LOGGER.info(
-                'No ConfigMaps found in namespace %s with label %s."',
-                namespace, PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
-            )
-            LOGGER.info('Getting data from ConfigMap %s/%s without label %s',
-                        namespace, name, PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR)
-            try:
-                config_map = self.k8s_client.read_namespaced_config_map(name, namespace)
-            except MaxRetryError as err:
-                raise ProductCatalogError(
-                    f'Unable to connect to Kubernetes to read {namespace}/{name} ConfigMap: {err}'
-                ) from err
-            except ApiException as err:
-                raise ProductCatalogError(
-                    f'Error reading {namespace}/{name} ConfigMap: {err.reason}'
-                ) from err
-            if config_map.data is None:
-                raise ProductCatalogError(
-                    f'No data found in {namespace}/{name} ConfigMap.'
-                )
-            try:
-                self.products = load_cm_data(config_map)
-            except YAMLError as err:
-                raise ProductCatalogError(
-                    f'Failed to load ConfigMap data: {err}'
-                ) from err
-        else:
-            try:
-                self.products = load_config_map_data(self.name, configmaps)
-            except YAMLError as err:
-                raise ProductCatalogError(
-                    f'Failed to load ConfigMap data: {err}'
-                ) from err
+        # Create a single instance of the schema validator. The same validator can be
+        # used for all versions of all products. This reduces the number of times we
+        # need to load the schema and validate it against the JSON schema meta-schema.
+        self.validator = get_validator()
+
+        config_map_data = self._get_config_map_data()
+        self.products = [
+            InstalledProductVersion(product_name, product_version, product_version_data,
+                                    validator=self.validator, shallow=self.shallow)
+            for product_name, product_data in config_map_data.items()
+            for product_version, product_version_data in product_data.items()
+        ]
 
         invalid_products = [
             str(p) for p in self.products if not p.is_valid
@@ -156,6 +129,93 @@ class ProductCatalog:
         self.products = [
             p for p in self.products if p.is_valid
         ]
+
+    def _get_config_maps(self):
+        """Get the ConfigMaps containing product catalog data from Kubernetes.
+
+        This finds and returns all ConfigMaps that have the new label
+        PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR. If no such ConfigMaps are found,
+        it falls back on the legacy ConfigMap with the name specified in the
+        constructor.
+
+        Raises:
+            ProductCatalogError: if there is a failure to query Kubernetes for
+                the ConfigMaps or if the single ConfigMap contains no data.
+
+        Returns:
+            list: A list of V1ConfigMap objects that contain product catalog data.
+        """
+        try:
+            config_maps = self.k8s_client.list_namespaced_config_map(
+                self.namespace, label_selector=PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR
+            ).items
+        except MaxRetryError as err:
+            raise ProductCatalogError(
+                f'Unable to connect to Kubernetes to read ConfigMaps in {self.namespace} namespace: {err}'
+            ) from err
+        except ApiException as err:
+            # The full string representation of ApiException is very long, so just log err.reason
+            raise ProductCatalogError(
+                f'Error listing ConfigMaps in {self.namespace} namespace: {err.reason}'
+            ) from err
+
+        if len(config_maps) == 0:
+            LOGGER.info('No ConfigMaps found with label "%s" in namespace "%s". '
+                        'Falling back on ConfigMap %s/%s',
+                        PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR,
+                        self.namespace, self.namespace, self.name)
+            try:
+                config_map = self.k8s_client.read_namespaced_config_map(self.name, self.namespace)
+            except MaxRetryError as err:
+                raise ProductCatalogError(
+                    f'Unable to connect to Kubernetes to read {self.namespace}/{self.name} ConfigMap: {err}'
+                ) from err
+            except ApiException as err:
+                raise ProductCatalogError(
+                    f'Error reading {self.namespace}/{self.name} ConfigMap: {err.reason}'
+                ) from err
+            if config_map.data is None:
+                raise ProductCatalogError(
+                    f'No data found in {self.namespace}/{self.name} ConfigMap.'
+                )
+            config_maps = [config_map]
+
+        return config_maps
+
+    def _get_config_map_data(self):
+        """Load product catalog data from the cray-product-catalog ConfigMaps.
+
+        This finds and merges data from all ConfigMaps that have the new label
+        PRODUCT_CATALOG_CONFIG_MAP_LABEL_STR or from the legacy ConfigMap with
+        the name specified in the constructor if no labeled ConfigMaps are found.
+
+        Raises:
+            ProductCatalogError: if there is a failure to load data from the
+                ConfigMap
+
+        Returns:
+            dict: A mapping from product name to another dict mapping from
+                product versions to the data for that product version.
+        """
+        config_maps = self._get_config_maps()
+        config_map_data = defaultdict(dict)
+        for cm in config_maps:
+            cm_name = cm.metadata.name
+            if self.shallow and cm_name != self.name or not cm_name.startswith(self.name):
+                # Skip if shallow and not the main config map or if the ConfigMap name
+                # does not start with the expected prefix.
+                continue
+            for product_name, product_data_str in cm.data.items():
+                try:
+                    product_data = safe_load(product_data_str)
+                except YAMLError as err:
+                    raise ProductCatalogError(
+                        f'Failed to load data for product "{product_name}" from ConfigMap {cm_name}: {err}'
+                    ) from err
+
+                config_map_data[product_name] = merge_dict(product_data, config_map_data[product_name])
+
+        return dict(config_map_data)
 
     def get_product(self, name, version=None):
         """Get the InstalledProductVersion matching the given name/version.
@@ -206,6 +266,11 @@ def load_cm_data(config_map):
     Returns:
         An array of InstalledProductVersion objects.
     """
+    warnings.warn(
+        "The 'load_cm_data' function is deprecated and will be removed in a future version of this library.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     return [
         InstalledProductVersion(product_name, product_version, product_version_data)
         for product_name, product_versions in config_map.data.items()
@@ -223,6 +288,11 @@ def load_config_map_data(name, configmaps):
     Returns:
         An array of InstalledProductVersion objects.
     """
+    warnings.warn(
+        "The 'load_config_map_data' function is deprecated and will be removed in a future version of this library.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     config_map_data = {}
     for cm in configmaps:
         if not cm.metadata.name.startswith(name):
@@ -250,20 +320,28 @@ class InstalledProductVersion:
             version in the product catalog, which is expected to contain a
             'component_versions' key that will point to the respective
             versions of product components, e.g. Docker images.
+        validator (jsonschema.protocols.Validator): A JSON schema validator for the
+            product version data. If None, a validator is created from the product
+            catalog schema file.
+        shallow (bool): If True, the product version data only includes data from
+            the main product ConfigMap, not from any of the product-specific ConfigMaps.
+            A warning will be logged any time `component_versions` data is accessed.
     """
-    def __init__(self, name, version, data):
+    def __init__(self, name, version, data, validator=None, shallow=False):
         self.name = name
         self.version = version
         self.data = data
+        self.validator = validator or get_validator()
+        self.shallow = shallow
 
     def __str__(self):
         return f'{self.name}-{self.version}'
 
-    @property
+    @cached_property
     def is_valid(self):
         """bool: True if this product's version data fits the schema."""
         try:
-            validate(self.data)
+            self.validator.validate(self.data)
             return True
         except ValidationError:
             return False
@@ -271,6 +349,8 @@ class InstalledProductVersion:
     @property
     def component_data(self):
         """dict: a mapping from types of components to lists of components"""
+        if self.shallow:
+            LOGGER.warning('Data from "component_versions" may be incomplete due to shallow loading.')
         return self.data.get(COMPONENT_VERSIONS_PRODUCT_MAP_KEY, {})
 
     @property

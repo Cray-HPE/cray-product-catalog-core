@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2021-2023, 2025 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -21,30 +21,36 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-
 """
-Validate data based on specified schema file
+Defines a decorator that creates a property that caches itself upon first access.
+
+If the required minimum Python version of this library is updated to Python 3.8
+or newer, this can be replaced with functools.cachedproperty.
 """
 
-import pkgutil
 
-import jsonschema
-import yaml
+class cached_property:
+    """A decorator to create a read-only property that caches itself upon first access."""
 
+    def __init__(self, func):
+        """Create a cached_property that implements the descriptor protocol.
 
-def get_validator():
-    """Get a JSON schema validator using the schema defined in schema.yaml.
+        Args:
+            func: The function to decorate.
+        """
+        self.func = func
 
-    Returns:
-        jsonschema.protocols.Validator: A validator class for the schema defined in schema.yaml
-    """
-    schema_data = pkgutil.get_data(__name__, 'schema.yaml')
-    schema_dict = yaml.safe_load(schema_data)
-    validator_cls = jsonschema.validators.validator_for(schema_dict)
-    return validator_cls(schema_dict)
+    def __get__(self, obj, cls):
+        """Gets and caches the result of `self.func`.
 
+        The result is cached in an attribute of the same name as the function
+        but with a leading underscore.
+        """
 
-def validate(data):
-    """Use the schema defined in schema.yaml to validate the given data."""
-    schema_data = pkgutil.get_data(__name__, 'schema.yaml')
-    return jsonschema.validate(data, yaml.safe_load(schema_data))
+        if obj is None:
+            return self
+
+        cached_attr_name = '_{}'.format(self.func.__name__)
+        if not hasattr(obj, cached_attr_name):
+            setattr(obj, cached_attr_name, self.func(obj))
+        return getattr(obj, cached_attr_name)
