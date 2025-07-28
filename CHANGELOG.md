@@ -8,17 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.8.0] - 2025-07-15
 
 ### Added
-- Added `shallow` boolean argument to the `ProductCatalog` constructor. If set
+- CRAYSAT-1944: Added `shallow` boolean argument to the `ProductCatalog` constructor. If set
   to `True`, it only loads product catalog data from the top-level ConfigMap,
   skipping over product-specific ConfigMaps containing `component_versions`
   data. This improves performance if that data is not needed.
 
 ### Changed
-- Improved performance of loading and validating product catalog data when
+- CRAYSAT-1944: Improved performance of loading and validating product catalog data when
   creating an instance of `ProductCatalog`.
 
 ### Deprecated
-- Deprecated top-level functions `load_cm_data` and `load_config_map_data`.
+- CRAYSAT-1944: Deprecated top-level functions `load_cm_data` and `load_config_map_data`.
   These were primarily for use by the `ProductCatalog` constructor, and external
   users of the library should not have been using them. They have been replaced
   by internal methods in `ProductCatalog` that are called in the constructor.
