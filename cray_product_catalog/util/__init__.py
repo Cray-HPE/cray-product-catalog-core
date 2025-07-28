@@ -1,6 +1,6 @@
 # MIT License
 #
-# (C) Copyright 2021-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2021-2023, 2025 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -27,3 +27,4 @@ Defines a utility function for loading the Kubernetes configuration.
 
 # import load_k8s here so that load_k8s can be imported from cray_product_catalog.util
 from cray_product_catalog.util.k8s import load_k8s
+from cray_product_catalog.util.cached_property import cached_property
