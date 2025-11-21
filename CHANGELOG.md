@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Dependencies
-
+- Bump `actions/checkout` from 4 to 6 ([#28](https://github.com/Cray-HPE/cray-product-catalog-core/pull/28), [#30](https://github.com/Cray-HPE/cray-product-catalog-core/pull/30))
 - Bump `actions/checkout` from 4 to 5 ([#28](https://github.com/Cray-HPE/cray-product-catalog-core/pull/28))
 
 ## [2.8.0] - 2025-07-15
